@@ -30,8 +30,8 @@ for molec in $molecList ; do
     echo >> submit_$molec
     echo "bash run_GFP_hbond.sh StartingStructures/${molec}.pdb" >> submit_$molec
    
-    sbatch submit_$molec
-#    bash run_GFP_hbond.sh StartingStructures/$molec.pdb 
+#    sbatch submit_$molec
+    bash run_GFP_hbond.sh StartingStructures/$molec.pdb 
 
 
     done 
