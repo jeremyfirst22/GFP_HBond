@@ -30,6 +30,7 @@ MDP=$TOP/mdp_files
 logFile=$TOP/$MOLEC/$MOLEC.log 
 errFile=$TOP/$MOLEC/$MOLEC.err 
 FF=$TOP/GMXFF
+FORCE_TOOLS=/Users/jeremyfirst/force_calc_tools
 
 check(){
    for var in $@ ; do 
@@ -291,6 +292,185 @@ analyze_hbond_nit(){
     check HBond_nit/$MOLEC.hb_count.xvg 
 }
 
+force_calc(){
+    printf "\n\t\tCalculating force:\n" 
+    if [[ ! -f force_calc/$MOLEC.solvent_rxn_field.projected.xvg || ! -f force_calc/$MOLEC.external_field.projected.xvg || ! -f force_calc/$MOLEC.total_field.xvg ]] ; then 
+
+    if [ ! -f $FORCE_TOOLS/g_insert_dummy_atom ] ; then 
+        printf "\t\t\tERROR: Force tools not found. Skipping force calc\n" 
+        return  
+        fi 
+
+    create_dir force_calc
+    cd force_calc 
+
+    if [ ! -d ../Production/amber03.ff ] ; then 
+        cp $FF/*.dat ../Production/. 
+        cp -r $FF/amber03.ff ../Production/.
+        fi 
+    check ../Production/amber03.ff/forcefield.itp 
+
+    ## We use veriosn 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
+    ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
+    ## atoms this should not matter. 
+    if [ ! -f $MOLEC.production.v4.tpr ] ; then 
+        grompp -f $MDP/production_gfp.mdp -o $MOLEC.production.v4.tpr -p ../Production/$MOLEC.neutral.top -c ../Production/$MOLEC.npt_relax.gro -maxwarn 3 >> $logFile 2>> $errFile 
+        fi
+    check $MOLEC.production.v4.tpr 
+    
+    CT=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep CT | awk '{print $3}'`
+    NH=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep NH | awk '{print $3}'`
+    #echo $CT $NH
+    
+    printf "\t\t\tInserting dummy atoms............................" 
+    if [ ! -s $MOLEC.with_dummy.xtc ] ; then 
+        $FORCE_TOOLS/g_insert_dummy_atom -s $MOLEC.production.v4.tpr -f ../Production/$MOLEC.production.nopbc.xtc -o $MOLEC.with_dummy.xtc -a1 $CT -a2 $NH >> $logFile 2>> $errFile 
+        printf "Done\n" 
+    else 
+        printf "Skipped\n" 
+        fi 
+    check $MOLEC.with_dummy.xtc
+
+    if [ ! -s $MOLEC.with_dummy.gro ] ; then 
+        $FORCE_TOOLS/g_insert_dummy_atom -s $MOLEC.production.v4.tpr -f ../Production/$MOLEC.production.nopbc.gro -o $MOLEC.with_dummy.gro -a1 $CT -a2 $NH >> $logFile 2>> $errFile 
+        fi 
+    check $MOLEC.with_dummy.gro 
+
+    if [ ! -s $MOLEC.with_dummy.top ] ; then 
+        if [ "${MOLEC: -1}" == "H" ] ; then 
+            echo '0 1 1 1 1 1 0 0 1 0 1' | gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 -his >> $logFile 2>> $errFile 
+        else 
+            echo '0 1 1 1 1 1 0 0 0 1' | gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 -his >> $logFile 2>> $errFile 
+            fi 
+        fi 
+    check $MOLEC.with_dummy.top 
+    
+    ##Find new atom numbers 
+    CT=`grep CNF $MOLEC.with_dummy.gro | grep CT | awk '{print $3}'`
+    NH=`grep CNF $MOLEC.with_dummy.gro | grep NH | awk '{print $3}'`
+
+    echo "[ probe ]" > probe.ndx 
+    echo "$CT $NH" >> probe.ndx 
+
+    echo "[ protein ]" > protein.ndx 
+    grep -v TCHG $MOLEC.with_dummy.gro | grep -v SOL | grep -v Na | grep -v Cl | tail -n+3 | sed '$d' | awk '{print $3}' >> protein.ndx 
+
+    cp $MOLEC.with_dummy.top $MOLEC.total_field.top 
+
+    if [ ! -s $MOLEC.solvent_rxn_field.top ] ; then 
+        $FORCE_TOOLS/zero_charges.py $MOLEC.with_dummy.top protein.ndx $MOLEC.solvent_rxn_field.top >> $logFile 2>> $errFile 
+        fi 
+
+    if [ ! -s $MOLEC.external_field.top ] ; then 
+        $FORCE_TOOLS/zero_charges.py $MOLEC.with_dummy.top probe.ndx $MOLEC.external_field.top >> $logFile 2>> $errFile 
+        fi 
+    check $MOLEC.total_field.top $MOLEC.external_field.top $MOLEC.solvent_rxn_field.top 
+
+    for field in total_field external_field solvent_rxn_field ; do 
+        printf "\t\t%20s..." "$field" 
+
+        ##Extract forces 
+        if [ ! -s $MOLEC.$field.projected.xvg ] ; then 
+            printf "forces..." 
+            if [ ! -s $MOLEC.$field.xvg ] ; then 
+                if [ ! -s $MOLEC.$field.tpr ] ; then 
+                    gmx grompp -f $MDP/rerun.mdp -p $MOLEC.$field.top -c $MOLEC.with_dummy.gro -o $MOLEC.$field.tpr  >> $logFile 2>> $errFile 
+                    fi 
+                check $MOLEC.$field.tpr 
+ 
+                if [ ! -s $MOLEC.$field.trr ] ; then 
+                    gmx mdrun -rerun $MOLEC.with_dummy.xtc -s $MOLEC.$field.tpr -deffnm $MOLEC.$field >> $logFile 2>> $errFile 
+                    fi 
+                check $MOLEC.$field.trr 
+
+                echo 2 | gmx traj -f $MOLEC.$field.trr -s $MOLEC.$field.tpr -of $MOLEC.$field.xvg -xvg none  >> $logFile 2>> $errFile 
+                rm $MOLEC.$field.trr 
+            fi 
+            check $MOLEC.$field.xvg 
+
+            ##extract postions for bond vector
+            printf "positions..." 
+            if [ ! -s $MOLEC.positions.xvg ] ; then 
+                gmx traj -f $MOLEC.with_dummy.xtc -s $MOLEC.$field.tpr -n probe.ndx -ox $MOLEC.positions.xvg -xvg none  >> $logFile 2>> $errFile 
+                fi 
+            check $MOLEC.positions.xvg 
+
+            ##project force along bond vector 
+            printf "Projecting..." 
+            $FORCE_TOOLS/get_force.py $MOLEC.positions.xvg $MOLEC.$field.xvg $MOLEC.$field.projected.xvg 
+            check $MOLEC.$field.projected.xvg 
+            printf "Done\n"  
+        else 
+            printf "..................................Skipped\n" 
+            fi 
+        done 
+    check $MOLEC.total_field.projected.xvg $MOLEC.external_field.projected.xvg $MOLEC.solvent_rxn_field.projected.xvg 
+    clean 
+    cd ../Production/
+    clean
+    cd ../
+    
+    else 
+        printf "\t\t\t\t  ............Skipped\n" 
+        fi 
+    printf "\n" 
+}
+
+sasa(){
+    printf "\t\tAnalyzing SASA................" 
+    if [[ ! -f sasa/$MOLEC.nh_cz.xvg || ! -f sasa/$MOLEC.cnf.xvg ]] ; then 
+        create_dir sasa 
+        cd sasa 
+    
+        if [ ! -f nh_cz.sasa.xvg ] ; then 
+            echo "a NH | a CZ && r CNF" > selection.dat
+            echo "q" >> selection.dat 
+            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.nopbc.gro -o nh_cz.ndx >> $logFile 2>> $errFile 
+            check nh_cz.ndx 
+
+            gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -surface 'Protein' -output '"NH_CZ_&_CNF"' -o $MOLEC.nh_cz.xvg -n nh_cz.ndx >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.nh_cz.xvg 
+            
+        if [ ! -f cnf.sasa.xvg ] ; then 
+            gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -o $MOLEC.cnf.xvg -surface 'Protein' -output 'resname CNF' >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.cnf.xvg 
+
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n" 
+        fi 
+} 
+
+chi1_his148(){
+    printf "\t\tCalculation chi1 of H148......" 
+    if [[ ! -f chi1_his148/$MOLEC.angaver.xvg || ! -f chi1_his148/$MOLEC.angdist.xvg ]] ; then 
+        create_dir chi1_his148 
+        cd chi1_his148 
+    
+        N=`grep " N " ../Production/$MOLEC.production.nopbc.gro | grep " 147HIS" | awk '{print$3}'`
+        CA=`grep " CA" ../Production/$MOLEC.production.nopbc.gro | grep " 147HIS" | awk '{print$3}'`
+        CB=`grep " CB" ../Production/$MOLEC.production.nopbc.gro | grep " 147HIS" | awk '{print$3}'`
+        CG=`grep " CG" ../Production/$MOLEC.production.nopbc.gro | grep " 147HIS" | awk '{print$3}'`
+        echo "[ chi1_his148 ] " > chi1_his148.ndx 
+        echo "$N   $CA   $CB   $CG   " >> chi1_his148.ndx 
+        echo " " >> chi1_his148.ndx 
+        check chi1_his148.ndx 
+
+        gmx angle -f ../Production/$MOLEC.production.nopbc.xtc -type dihedral -n chi1_his148.ndx -od $MOLEC.angdist.xvg -ov $MOLEC.angaver.xvg >> $logFile 2>> $errFile 
+
+        check $MOLEC.angaver.xvg $MOLEC.angdist.xvg
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n" 
+        fi 
+} 
+
 printf "\n\t\t*** Program Beginning ***\n\n" 
 cd $MOLEC
 protein_min
@@ -299,6 +479,9 @@ solvent_min
 production_run 
 analyze_hbond
 analyze_hbond_nit
+force_calc
+sasa
+chi1_his148
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
