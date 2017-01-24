@@ -292,6 +292,98 @@ analyze_hbond_nit(){
     check HBond_nit/$MOLEC.hb_count.xvg 
 }
 
+analyze_hbond_nit_120(){
+    printf "\t\tAnaylzing HBond_nit content..."
+    if [ ! -s HBond_nit_120/$MOLEC.hb_count.xvg ] ; then 
+        create_dir HBond_nit_120
+        cd HBond_nit_120
+
+    if [ ! -d ../Production/amber03.ff ] ; then 
+        cp $FF/*.dat ../Production/. 
+        cp -r $FF/amber03.ff ../Production/.
+        fi 
+    check ../Production/amber03.ff/forcefield.itp 
+
+        ## We use veriosn 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
+        ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
+        ## atoms this should not matter. 
+        if [ ! -f $MOLEC.production.v4.tpr ] ; then 
+            grompp -f $MDP/production_gfp.mdp -o $MOLEC.production.v4.tpr -p ../Production/$MOLEC.neutral.top -c ../Production/$MOLEC.npt_relax.gro -maxwarn 3 >> $logFile 2>> $errFile 
+            fi
+        check $MOLEC.production.v4.tpr 
+    
+        CT=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep NH | awk '{print $3}'`
+        #echo $CT $NH
+        
+        if [ ! -s $MOLEC.hb_count.xvg ] ; then  
+            $HOME/andrews_gmx/g_nitrile_hbond/g_nitrile_hbond \
+                -s $MOLEC.production.v4.tpr \
+                -f ../Production/$MOLEC.production.nopbc.xtc \
+                -a1 $CT -a2 $NH \
+                -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
+                -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
+                -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
+                -CNH_cutoff 120 >> $logFile 2>> $errFile
+            check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
+        fi 
+        
+        check $MOLEC.hb_count.xvg 
+        printf "Success\n" 
+        clean
+        cd ../
+    else 
+        printf "Skipped\n" 
+        fi 
+    check HBond_nit_120/$MOLEC.hb_count.xvg 
+}
+
+analyze_hbond_nit_60(){
+    printf "\t\tAnaylzing HBond_nit content..."
+    if [ ! -s HBond_nit_60/$MOLEC.hb_count.xvg ] ; then 
+        create_dir HBond_nit_60
+        cd HBond_nit_60
+
+    if [ ! -d ../Production/amber03.ff ] ; then 
+        cp $FF/*.dat ../Production/. 
+        cp -r $FF/amber03.ff ../Production/.
+        fi 
+    check ../Production/amber03.ff/forcefield.itp 
+
+        ## We use veriosn 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
+        ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
+        ## atoms this should not matter. 
+        if [ ! -f $MOLEC.production.v4.tpr ] ; then 
+            grompp -f $MDP/production_gfp.mdp -o $MOLEC.production.v4.tpr -p ../Production/$MOLEC.neutral.top -c ../Production/$MOLEC.npt_relax.gro -maxwarn 3 >> $logFile 2>> $errFile 
+            fi
+        check $MOLEC.production.v4.tpr 
+    
+        CT=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep NH | awk '{print $3}'`
+        #echo $CT $NH
+        
+        if [ ! -s $MOLEC.hb_count.xvg ] ; then  
+            $HOME/andrews_gmx/g_nitrile_hbond/g_nitrile_hbond \
+                -s $MOLEC.production.v4.tpr \
+                -f ../Production/$MOLEC.production.nopbc.xtc \
+                -a1 $CT -a2 $NH \
+                -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
+                -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
+                -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
+                -CNH_cutoff 120 >> $logFile 2>> $errFile
+            check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
+        fi 
+        
+        check $MOLEC.hb_count.xvg 
+        printf "Success\n" 
+        clean
+        cd ../
+    else 
+        printf "Skipped\n" 
+        fi 
+    check HBond_nit_60/$MOLEC.hb_count.xvg 
+}
+
 force_calc(){
     printf "\n\t\tCalculating force:\n" 
     if [[ ! -f force_calc/$MOLEC.solvent_rxn_field.projected.xvg || ! -f force_calc/$MOLEC.external_field.projected.xvg || ! -f force_calc/$MOLEC.total_field.xvg ]] ; then 
@@ -418,11 +510,11 @@ force_calc(){
 
 sasa(){
     printf "\t\tAnalyzing SASA................" 
-    if [[ ! -f sasa/$MOLEC.nh_cz.xvg || ! -f sasa/$MOLEC.cnf.xvg ]] ; then 
+    if [[ ! -f sasa/$MOLEC.nh_cz.xvg || ! -f sasa/$MOLEC.cnf.xvg || ! -f sasa/$MOLEC.nh.xvg ]] ; then 
         create_dir sasa 
         cd sasa 
     
-        if [ ! -f nh_cz.sasa.xvg ] ; then 
+        if [ ! -f $MOLEC.nh_cz.xvg ] ; then 
             echo "a NH | a CZ && r CNF" > selection.dat
             echo "q" >> selection.dat 
             cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.nopbc.gro -o nh_cz.ndx >> $logFile 2>> $errFile 
@@ -431,8 +523,18 @@ sasa(){
             gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -surface 'Protein' -output '"NH_CZ_&_CNF"' -o $MOLEC.nh_cz.xvg -n nh_cz.ndx >> $logFile 2>> $errFile 
             fi 
         check $MOLEC.nh_cz.xvg 
+
+        if [ ! -f $MOLEC.nh.xvg ] ; then 
+            echo "a NH && r CNF" > selection.dat
+            echo "q" >> selection.dat 
+            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.nopbc.gro -o nh.ndx >> $logFile 2>> $errFile 
+            check nh.ndx 
+
+            gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -surface 'Protein' -output '"NH_&_CNF"' -o $MOLEC.nh.xvg -n nh.ndx >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.nh.xvg 
             
-        if [ ! -f cnf.sasa.xvg ] ; then 
+        if [ ! -f $MOLEC.cnf.xvg ] ; then 
             gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -o $MOLEC.cnf.xvg -surface 'Protein' -output 'resname CNF' >> $logFile 2>> $errFile 
             fi 
         check $MOLEC.cnf.xvg 
@@ -477,10 +579,12 @@ protein_min
 solvate
 solvent_min
 production_run 
-#analyze_hbond
-#analyze_hbond_nit
-#force_calc
-#sasa
+analyze_hbond
+analyze_hbond_nit
+analyze_hbond_nit_120
+analyze_hbond_nit_60 
+force_calc
+sasa
 chi1_his148
 cd ../
 
