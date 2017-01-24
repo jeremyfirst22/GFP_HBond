@@ -573,6 +573,32 @@ chi1_his148(){
         fi 
 } 
 
+chi1_cnf(){
+    printf "\t\tCalculation chi1 of CNF......." 
+    if [[ ! -f chi1_cnf/$MOLEC.angaver.xvg || ! -f chi1_cnf/$MOLEC.angdist.xvg ]] ; then 
+        create_dir chi1_cnf
+        cd chi1_cnf
+    
+        N=`grep " N " ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
+        CA=`grep " CA" ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
+        CB=`grep " CB" ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
+        CG=`grep " CG" ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
+        echo "[ chi1_cnf ] " > chi1_cnf.ndx 
+        echo "$N   $CA   $CB   $CG   " >> chi1_cnf.ndx 
+        echo " " >> chi1_cnf.ndx 
+        check chi1_cnf.ndx 
+
+        gmx angle -f ../Production/$MOLEC.production.nopbc.xtc -type dihedral -n chi1_cnf.ndx -od $MOLEC.angdist.xvg -ov $MOLEC.angaver.xvg >> $logFile 2>> $errFile 
+
+        check $MOLEC.angaver.xvg $MOLEC.angdist.xvg
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n" 
+        fi 
+} 
+
 printf "\n\t\t*** Program Beginning ***\n\n" 
 cd $MOLEC
 protein_min
@@ -586,6 +612,7 @@ analyze_hbond_nit_60
 force_calc
 sasa
 chi1_his148
+chi1_cnf
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
