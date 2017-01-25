@@ -510,7 +510,7 @@ force_calc(){
 
 force_calc_APBS(){
     tot=50000
-    numFrames=10
+    numFrames=100
     timeStep=$(echo "$tot / $numFrames" | bc) #ps
 
     printf "\t\tForce Calc APBS:\n"
