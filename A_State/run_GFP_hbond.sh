@@ -64,7 +64,7 @@ create_dir(){
 }
 
 protein_min(){
-    printf "\t\tProtein STEEP................." 
+    printf "\t\tProtein STEEP...................." 
     if [ ! -f Protein_min/$MOLEC.solute_min.gro ] ; then 
         create_dir Protein_min
 
@@ -95,7 +95,7 @@ protein_min(){
 }
 
 solvate(){
-    printf "\t\tSolvating....................." 
+    printf "\t\tSolvating........................" 
     if [ ! -f Solvate/$MOLEC.neutral.gro ] ; then 
         create_dir Solvate
 
@@ -134,7 +134,7 @@ solvate(){
 }
 
 solvent_min(){
-    printf "\t\tSolvent minimization.........." 
+    printf "\t\tSolvent minimization............." 
     if [ ! -f Solvent_min/$MOLEC.npt_relax.gro ] ; then 
         if [ ! -f Solvent_min/$MOLEC.minimize.gro ] ; then 
             create_dir Solvent_min
@@ -177,7 +177,7 @@ solvent_min(){
 } 
 
 production_run(){
-    printf "\t\tProduction run ..............." 
+    printf "\t\tProduction run..................." 
     if [ ! -f Production/$MOLEC.production.nopbc.gro ] ; then 
         create_dir Production
         cp Solvent_min/$MOLEC.npt_relax.gro Production
@@ -213,7 +213,7 @@ production_run(){
 }
 
 analyze_hbond(){
-    printf "\t\tAnalyzing Hbond content ......" 
+    printf "\t\tAnalyzing Hbond content.........." 
     if [[ ! -f HBond/cnf_num.xvg || ! -f HBond/cro_num.xvg ]] ; then 
         create_dir HBond
         cd HBond
@@ -248,7 +248,7 @@ analyze_hbond(){
 } 
 
 analyze_hbond_nit(){
-    printf "\t\tAnaylzing HBond_nit content..."
+    printf "\t\tAnaylzing HBond_nit content......"
     if [ ! -s HBond_nit/$MOLEC.hb_count.xvg ] ; then 
         create_dir HBond_nit
         cd HBond_nit
@@ -293,7 +293,7 @@ analyze_hbond_nit(){
 }
 
 analyze_hbond_nit_120(){
-    printf "\t\tAnaylzing HBond_nit content..."
+    printf "\t\tAnaylzing HBond_nit content......"
     if [ ! -s HBond_nit_120/$MOLEC.hb_count.xvg ] ; then 
         create_dir HBond_nit_120
         cd HBond_nit_120
@@ -339,7 +339,7 @@ analyze_hbond_nit_120(){
 }
 
 analyze_hbond_nit_60(){
-    printf "\t\tAnaylzing HBond_nit content..."
+    printf "\t\tAnaylzing HBond_nit content......"
     if [ ! -s HBond_nit_60/$MOLEC.hb_count.xvg ] ; then 
         create_dir HBond_nit_60
         cd HBond_nit_60
@@ -386,7 +386,7 @@ analyze_hbond_nit_60(){
 
 force_calc(){
     printf "\n\t\tCalculating force:\n" 
-    if [[ ! -f force_calc/$MOLEC.solvent_rxn_field.projected.xvg || ! -f force_calc/$MOLEC.external_field.projected.xvg || ! -f force_calc/$MOLEC.total_field.xvg ]] ; then 
+    if [[ ! -f force_calc/$MOLEC.solvent_rxn_field.projected.xvg || ! -f force_calc/$MOLEC.external_field.projected.xvg || ! -f force_calc/$MOLEC.total_field.projected.xvg ]] ; then 
 
     if [ ! -f $FORCE_TOOLS/g_insert_dummy_atom ] ; then 
         printf "\t\t\tERROR: Force tools not found. Skipping force calc\n" 
@@ -503,13 +503,129 @@ force_calc(){
     cd ../
     
     else 
-        printf "\t\t\t\t  ............Skipped\n" 
+        printf "\t\t\t\t  ...............Skipped\n" 
         fi 
     printf "\n" 
 }
 
+force_calc_APBS(){
+    tot=50000
+    numFrames=10
+    timeStep=$(echo "$tot / $numFrames" | bc) #ps
+
+    printf "\t\tForce Calc APBS:\n"
+
+    force_done=1 ##True 
+    for frame in $(seq 0 $timeStep $tot) ; do 
+        if [[ ! -f force_calc_APBS/time_${frame}_1.txt || ! -f force_calc_APBS/time_${frame}_78.txt ]] ; then 
+            force_done=0 ##Not done 
+            fi 
+        done 
+    if [[ ! -f force_calc_APBS/$MOLEC.coloumb_field.out || ! -f force_calc_APBS/$MOLEC.rxn_field.out ]] ; then 
+            force_done=0
+            fi 
+
+    if [ ${force_done} -eq 0 ] ; then 
+
+        if [[ $timeStep -lt 20 ]] ; then 
+            echo "ERROR: Requested time step is $timeStep. Frames only printed every 20 ps"
+            exit ; fi 
+        if (( $tot % 4 )) ; then 
+            echo "WARNING: $tot % 4 != 0. There may not be frames for requested time steps" 
+            fi 
+
+        check ../free_energy_files/AMBER.DAT ../free_energy_files/AMBER.names
+        create_dir force_calc_APBS 
+        cd force_calc_APBS
+
+        cp ../../free_energy_files/AMBER.DAT . 
+        cp ../../free_energy_files/AMBER.names . 
+        
+        printf "\t\t\tPre-Compress............."
+        if [ ! -f $MOLEC.compress.xtc ] ; then 
+            echo '0' | gmx trjconv -f ../Production/$MOLEC.production.nopbc.xtc -s ../Production/$MOLEC.production.tpr -o $MOLEC.compress.xtc -b 0 -e $tot -dt $timeStep -tu ps >> $logFile 2>> $errFile 
+            check $MOLEC.compress.xtc 
+            printf "Complete\n" 
+        else 
+            printf "Skipped\n" 
+            fi 
+        
+        for frame in $(seq 0 $timeStep $tot) ; do 
+            printf "\t\t\tReading %5i of %5i..." $frame $tot
+            if [[ ! -f time_${frame}_78.txt || ! -f time_${frame}_1.txt ]] ; then 
+
+                if [ ! -f time_${frame}.pdb ] ; then 
+                    echo '1' | gmx trjconv -f ../Production/$MOLEC.production.nopbc.xtc -s ../Production/$MOLEC.production.tpr -o time_${frame}.pdb -dump $frame -tu ps >> $logFile 2>> $errFile 
+                    check time_${frame}.pdb 
+                    fi 
+            
+                ####For whatever reason, AOBS only support 3-character names for residues 
+                sed "s/CROn/CRO /" time_${frame}.pdb > temp.pdb      
+                mv temp.pdb time_${frame}.pdb 
+
+                if ! grep -sq CRO time_${frame}.pdb ; then 
+                    printf "ERROR: We left CRO behind! \n" 
+                    exit
+                    fi 
+
+                if [ ! -f time_${frame}.pqr ] ; then 
+                    pdb2pqr time_${frame}.pdb time_${frame}.pqr --userff AMBER.DAT --usernames AMBER.names --assign-only >> $logFile 2>> $errFile
+                    fi 
+                check time_${frame}.pqr 
+
+                if [ ! -f time_${frame}+DUM.pqr ] ; then 
+                    python ../../free_energy_files/add_dummy_pqr.py time_${frame}.pqr 0.1 CNF CT NH > time_${frame}+DUM.pqr 
+                    fi  
+                check time_${frame}+DUM.pqr 
+        
+                sed "s/SDIE/78/" ../../free_energy_files/force_temp.in | sed "s/FRAME/${frame}/" >> time_${frame}_78.in 
+                check time_${frame}_78.in 
+                #echo ${frame}
+
+                apbs time_${frame}_78.in >> $logFile 2>> $errFile 
+                check time_${frame}_78.txt 
+
+                sed "s/SDIE/1/" ../../free_energy_files/force_temp.in | sed "s/FRAME/${frame}/" >> time_${frame}_1.in 
+                check time_${frame}_1.in 
+
+                apbs time_${frame}_1.in >> $logFile 2>> $errFile 
+                check time_${frame}_1.txt
+
+                printf "Complete\n" 
+            else 
+                printf "Skipped\n" 
+                fi 
+            done 
+        
+        printf "\t\t\tCompiling fields........."
+        if [ -f $MOLEC.coloumb_field.out ] ; then 
+            rm $MOLEC.coloumb_field.out 
+            fi 
+        if [ -f $MOLEC.rxn_field.out ] ; then 
+            rm $MOLEC.rxn_field.out
+            fi 
+        for frame in $(seq 0 $timeStep $tot) ; do 
+            ../../free_energy_files/read_apbs_rxn_field time_${frame}+DUM.pqr time_${frame}_78.txt time_${frame}_1.txt >> $MOLEC.rxn_field.out 2>> /dev/null 
+            check $MOLEC.rxn_field.out 
+
+            python ../../free_energy_files/analytic_coloumb.py time_${frame}.pqr CNF NH CT >> $MOLEC.coloumb_field.out 2>> /dev/null 
+            check $MOLEC.coloumb_field.out
+            done 
+        printf "Complete\n" 
+
+
+        check $MOLEC.coloumb_field.out $MOLEC.rxn_field.out 
+        clean 
+        cd ../
+        
+    else 
+        printf "\t\t\t\t  ...............Skipped\n" 
+        fi 
+    printf "\n" 
+} 
+
 sasa(){
-    printf "\t\tAnalyzing SASA................" 
+    printf "\t\tAnalyzing SASA..................." 
     if [[ ! -f sasa/$MOLEC.nh_cz.xvg || ! -f sasa/$MOLEC.cnf.xvg || ! -f sasa/$MOLEC.nh.xvg ]] ; then 
         create_dir sasa 
         cd sasa 
@@ -548,7 +664,7 @@ sasa(){
 } 
 
 chi1_his148(){
-    printf "\t\tCalculation chi1 of H148......" 
+    printf "\t\tCalculation chi1 of H148........." 
     if [[ ! -f chi1_his148/$MOLEC.angaver.xvg || ! -f chi1_his148/$MOLEC.angdist.xvg ]] ; then 
         create_dir chi1_his148 
         cd chi1_his148 
@@ -574,7 +690,7 @@ chi1_his148(){
 } 
 
 chi1_cnf(){
-    printf "\t\tCalculation chi1 of CNF......." 
+    printf "\t\tCalculation chi1 of CNF.........." 
     if [[ ! -f chi1_cnf/$MOLEC.angaver.xvg || ! -f chi1_cnf/$MOLEC.angdist.xvg ]] ; then 
         create_dir chi1_cnf 
         cd chi1_cnf 
@@ -610,6 +726,7 @@ analyze_hbond_nit
 analyze_hbond_nit_120
 analyze_hbond_nit_60 
 force_calc
+force_calc_APBS 
 sasa
 chi1_his148
 chi1_cnf
