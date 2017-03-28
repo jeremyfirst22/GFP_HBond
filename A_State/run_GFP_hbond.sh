@@ -224,7 +224,7 @@ analyze_hbond(){
             cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.gro -o cnf_nh.ndx >> $logFile 2>> $errFile 
             check cnf_nh.ndx 
 
-            echo '18 14 18' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 1 -r 0.3 -a 20 -num cnf_num.xvg >> $logFile 2>> $errFile 
+            echo '18 14 18' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 1 -r 0.3 -a 20 -num cnf_num.xvg -life cnf_hblife.xvg >> $logFile 2>> $errFile 
             fi 
         check cnf_num.xvg 
             
@@ -648,7 +648,7 @@ sasa(){
 
             gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -surface 'Protein' -output '"NH_&_CNF"' -o $MOLEC.nh.xvg -n nh.ndx >> $logFile 2>> $errFile 
             fi 
-        check $MOLEC.nh_cz.xvg 
+        check $MOLEC.nh.xvg 
             
         if [ ! -f $MOLEC.cnf.xvg ] ; then 
             gmx sasa -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -o $MOLEC.cnf.xvg -surface 'Protein' -output 'resname CNF' >> $logFile 2>> $errFile 

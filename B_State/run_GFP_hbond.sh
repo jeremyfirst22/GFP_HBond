@@ -224,7 +224,7 @@ analyze_hbond(){
             cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.gro -o cnf_nh.ndx >> $logFile 2>> $errFile 
             check cnf_nh.ndx 
 
-            echo '18 14 18' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 1 -r 0.3 -a 20 -num cnf_num.xvg >> $logFile 2>> $errFile 
+            echo '18 14 18' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 1 -r 0.3 -a 20 -num cnf_num.xvg -life cnf_hblife.xvg >> $logFile 2>> $errFile 
             fi 
         check cnf_num.xvg 
             
@@ -324,7 +324,7 @@ analyze_hbond_nit_120(){
                 -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
                 -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
                 -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
-                -CNH_cutoff 120 >> $logFile 2>> $errFile
+                -CNH_cutoff 120 >> $logFile 2>> $errFile 
             check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
         fi 
         
@@ -370,7 +370,7 @@ analyze_hbond_nit_60(){
                 -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
                 -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
                 -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
-                -CNH_cutoff 120 >> $logFile 2>> $errFile
+                -CNH_cutoff 60 >> $logFile 2>> $errFile 
             check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
         fi 
         
@@ -692,8 +692,8 @@ chi1_his148(){
 chi1_cnf(){
     printf "\t\tCalculation chi1 of CNF.........." 
     if [[ ! -f chi1_cnf/$MOLEC.angaver.xvg || ! -f chi1_cnf/$MOLEC.angdist.xvg ]] ; then 
-        create_dir chi1_cnf
-        cd chi1_cnf
+        create_dir chi1_cnf 
+        cd chi1_cnf 
     
         N=`grep " N " ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
         CA=`grep " CA" ../Production/$MOLEC.production.nopbc.gro | grep "CNF" | awk '{print$3}'`
