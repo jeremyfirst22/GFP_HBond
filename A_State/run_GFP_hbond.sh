@@ -430,9 +430,9 @@ force_calc(){
 
     if [ ! -s $MOLEC.with_dummy.top ] ; then 
         if [ "${MOLEC: -1}" == "H" ] ; then 
-            echo '0 1 1 1 1 1 0 0 1 0 1' | gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 -his >> $logFile 2>> $errFile 
+            gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 >> $logFile 2>> $errFile 
         else 
-            echo '0 1 1 1 1 1 0 0 0 1' | gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 -his >> $logFile 2>> $errFile 
+            gmx pdb2gmx -f $MOLEC.with_dummy.gro -p $MOLEC.with_dummy.top -water tip3p -ff amber03 >> $logFile 2>> $errFile 
             fi 
         fi 
     check $MOLEC.with_dummy.top 
@@ -723,13 +723,13 @@ solvent_min
 production_run 
 analyze_hbond
 analyze_hbond_nit
-analyze_hbond_nit_120
-analyze_hbond_nit_60 
+#analyze_hbond_nit_120
+#analyze_hbond_nit_60 
 force_calc
 force_calc_APBS 
 sasa
-chi1_his148
-chi1_cnf
+#chi1_his148
+#chi1_cnf
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
