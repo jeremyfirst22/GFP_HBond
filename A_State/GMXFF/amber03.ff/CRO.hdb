@@ -1,0 +1,28 @@
+CROa   11
+1       1       H       N       -C      CA1
+1       5       HA1     CA1     N       CB1     C1
+1       5       HB1     CB1     CA1     CG1     OG1
+3       4       HG1     CG1     CB1     CA1
+1       2       HG1     OG1     CB1     CA1
+1       1       HB2     CB2     CA2     CG2
+1       1       HD1     CD1     CE1     CG2
+1       1       HE1     CE1     CD1     CZ
+1       1       HE2     CE2     CZ      CD2
+1       1       HD2     CD2     CG2     CE2
+2       6       HA3     CA3     N3      C 
+CROn   12
+1       1       H       N       -C      CA1
+1       5       HA1     CA1     N       CB1     C1
+1       5       HB1     CB1     CA1     CG1     OG1
+3       4       HG1     CG1     CB1     CA1
+1       2       HG1     OG1     CB1     CA1
+1       1       HB2     CB2     CA2     CG2
+1       1       HD1     CD1     CE1     CG2
+1       1       HE1     CE1     CD1     CZ
+1       2       HH      OH      CZ      CE2
+1       1       HE2     CE2     CZ      CD2
+1       1       HD2     CD2     CG2     CE2
+2       6       HA3     CA3     N3      C 
+
+
+

@@ -1,0 +1,202 @@
+[ bondedtypes ]
+; Col 1: Type of bond
+; Col 2: Type of angles
+; Col 3: Type of proper dihedrals
+; Col 4: Type of improper dihedrals
+; Col 5: Generate all dihedrals if 1, only heavy atoms of 0.
+; Col 6: Number of excluded neighbors for nonbonded interactions
+; Col 7: Generate 1,4 interactions between pairs of hydrogens if 1
+; Col 8: Remove impropers over the same bond as a proper if it is 1
+; bonds  angles  dihedrals  impropers all_dihedrals nrexcl HH14 RemoveDih
+     1       1          9          4        1         3      1     0
+
+; now: water, ions, urea, terminal caps, AA's and terminal AA's
+
+[ CROa ]  ;anionic TYG
+ [ atoms ]
+ N  	N	-0.415700     1
+ H  	H	 0.271900     2
+ CA1 	CT	-0.038900     3
+ HA1 	H1	 0.100700     4
+ CB1 	CT	 0.365400     5
+ HB1 	H1	 0.004300     6
+ CG1 	CT	-0.243800     7
+ HG11 	HC	 0.064200     8
+ HG12 	HC	 0.064200     9
+ HG13 	HC	 0.064200    10
+ OG1 	OH	-0.676100    11
+ HG1 	HO	 0.410200    12
+ C1 	CR	 0.262090    13
+ N2 	NB	-0.510620    14
+ CA2	CJ	 0.015450    15
+ CB2 	CI	-0.072370    16
+ HB2 	HA	 0.118000    17   
+ CG2 	CD	-0.076160    18
+ CD2 	CE	-0.154210    19
+ HD2 	HA	 0.142510    20
+ CE2 	CH	-0.395320    21
+ HE2 	HA	 0.127230    22
+ CZ 	CL	 0.668300    23
+ OH 	O	-0.701130    24
+ CE1 	CH	-0.418810    25
+ HE1 	HA	 0.130090    26
+ CD1 	CE	-0.015050    27
+ HD1 	HA	 0.102030    28
+ C22 	C	 0.351650    29
+ O22 	O       -0.617380    30
+ N3 	Nx	-0.070690    31
+ CA3 	CT	-0.025200    32 
+ HA31 	H1	 0.069800    33
+ HA32 	H1	 0.069800    34
+ C 	C	 0.597300    35
+ O  	O	-0.567900    36
+  [ bonds ]
+ -C	 N 
+ C22	 O22
+ CE1	 CD1
+ CZ	 OH
+ CZ	 CE1
+ CE2	 CZ
+ CD2	 CE2
+ CG2	 CD2
+ CG2	 CD1
+ CB1	 CG1
+ CB1	 OG1
+ C	 O 
+ CB2	 CG2
+ CA1	 CB1
+ CA1	 C1
+ CA2	 CB2
+ CA2	 C22
+ CA3	 C
+ N3	 CA3
+ N3	 C22
+ N3	 C1
+ N2	 CA2
+ N2	 C1
+ N 	 CA1
+ H       N 
+ HA1     CA1
+ HB1     CB1
+ HG1     OG1
+ HG11    CG1
+ HG12    CG1
+ HG13    CG1
+ HD1     CD1
+ HE1     CE1
+ HE2     CE2
+ HD2     CD2
+ HB2     CB2
+ HA31    CA3
+ HA32    CA3
+ C       +N
+  [ impropers ]
+ -C    CA1  N   H 
+ CA3   +N    C  O 
+ CG2  CA2  CB2  HB2  
+ CG2  CE2  CD2  HD2  
+ CD2  CZ   CE2  HE2  
+ CZ   CD1  CE1  HE1  
+ CG2  CE1  CD1  HD1 
+ C22  C1   N3   CA3  
+ N2   C22  CA2  CB2  
+ CD2  CD1  CG2  CB2  
+ CE2  CE1  CZ   OH   
+ N2   N3   C1   CA1  
+ N3   CA2  C22  O22   
+
+ [CROn ]  ; neutral TYG
+ [ atoms ]
+ N  	N	-0.415700     1
+ H  	H	 0.271900     2
+ CA1 	CT	-0.038900     3
+ HA1 	H1	 0.100700     4
+ CB1 	CT	 0.365400     5
+ HB1 	H1	 0.004300     6
+ CG1 	CT	-0.243800     7
+ HG11 	HC	 0.064200     8
+ HG12 	HC	 0.064200     9
+ HG13 	HC	 0.064200    10
+ OG1 	OH	-0.676100    11
+ HG1 	HO	 0.410200    12
+ C1 	CRn	 0.399490    13
+ N2 	NB	-0.523970    14
+ CA2	CJn	 0.072440    15
+ CB2 	CIn	-0.075190    16
+ HB2 	HA	 0.114450    17  
+ CG2 	CA	-0.010890    18 
+ CD2 	CA	-0.142660    19
+ HD2 	HA	 0.172610    20
+ CE2 	CA	-0.336420    21
+ HE2 	HA	 0.165480    22
+ CZ 	C 	 0.385370    23
+ OH 	OH	-0.603440    24 
+ HH 	HO	 0.441130    25
+ CE1 	CA	-0.266730    26 
+ HE1 	HA	 0.180800    27 
+ CD1 	CA	-0.027500    28
+ HD1 	HA	 0.105880    29
+ C22 	C	 0.398950    30
+ O22 	O       -0.528980    31
+ N3 	Nx	-0.035220    32
+ CA3 	CT	-0.025200    33 
+ HA31 	H1	 0.069800    34
+ HA32 	H1	 0.069800    35
+ C 	C	 0.597300    36
+ O  	O	-0.567900    37
+  [ bonds ]
+ -C	 N 
+ C22	 O22
+ CE1	 CD1
+ CZ	 OH
+ OH      HH
+ CZ	 CE1
+ CE2	 CZ
+ CD2	 CE2
+ CG2	 CD2
+ CG2	 CD1
+ CB1	 CG1
+ CB1	 OG1
+ C	 O 
+ CB2	 CG2
+ CA1	 CB1
+ CA1	 C1
+ CA2	 CB2
+ CA2	 C22
+ CA3	 C
+ N3	 CA3
+ N3	 C22
+ N3	 C1
+ N2	 CA2
+ N2	 C1
+ N 	 CA1
+ H       N 
+ HA1     CA1
+ HB1     CB1
+ HG1     OG1
+ HG11    CG1
+ HG12    CG1
+ HG13    CG1
+ HD1     CD1
+ HE1     CE1
+ HE2     CE2
+ HD2     CD2
+ HB2     CB2
+ HA31    CA3
+ HA32    CA3
+ C       +N
+  [ impropers ]
+ -C    CA1  N   H 
+ CA3   +N    C  O 
+ CG2  CA2  CB2  HB2  
+ CG2  CE2  CD2  HD2  
+ CD2  CZ   CE2  HE2  
+ CZ   CD1  CE1  HE1  
+ CG2  CE1  CD1  HD1 
+ C22  C1   N3   CA3  
+ N2   C22  CA2  CB2  
+ CD2  CD1  CG2  CB2  
+ CE2  CE1  CZ   OH   
+ N2   N3   C1   CA1  
+ N3   CA2  C22  O22   
+
