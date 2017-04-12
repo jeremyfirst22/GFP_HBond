@@ -663,6 +663,61 @@ sasa(){
         fi 
 } 
 
+rmsd(){
+    printf "\t\tCalculating RMS Deviation........"
+    if [ ! -f rmsd/$MOLEC.crystal.xvg ] ; then 
+        create_dir rmsd
+        cd rmsd
+
+        if [ ! -f crystal.ndx ] ; then 
+            echo '4 && ri 3-230' > selection.dat 
+            echo 'q ' >> selection.dat 
+            
+            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.tpr -o crystal.ndx >> $logFile 2>> $errFile 
+            check crystal.ndx 
+            fi  
+        if [ ! -f $MOLEC.crystal.xvg ] ; then 
+            echo 'Backbone_&_r_3-230 Backbone_&_r_3-230' | gmx rms \
+                -s ../Production/$MOLEC.production.tpr \
+                -f ../Production/$MOLEC.production.nopbc.xtc \
+                -o $MOLEC.crystal.xvg \
+                -n crystal.ndx >> $logFile 2>> $errFile 
+            fi  
+
+        check $MOLEC.crystal.xvg 
+        clean 
+        printf "Success\n"
+        cd ../ 
+    else 
+        printf "Skipped\n"
+        fi  
+}
+
+r_gyrate(){
+    printf "\t\tCalculating radius of gyration..."
+    if [ ! -f gyrate/$MOLEC.gyrate.xvg ] ; then 
+        create_dir gyrate   
+        cd gyrate
+        if [ ! -f crystal.ndx ] ; then 
+            echo '4 && ri 3-230' > selection.dat 
+            echo 'q' >> selection.dat 
+
+            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.tpr -o crystal.ndx >> $logFile 2>> $errFile 
+            check crystal.ndx 
+            fi 
+        if [ ! -f $MOLEC.gyrate.xvg ] ; then 
+            echo 'Backbone_&_r_3-230' | gmx gyrate -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.xtc -o $MOLEC.gyrate.xvg -n crystal.ndx >> $logFile 2>> $errFile 
+            fi 
+
+        check $MOLEC.gyrate.xvg 
+        clean 
+        printf "Success\n" 
+        cd ../
+    else 
+        printf "Skipped\n" 
+        fi 
+}
+
 chi1_his148(){
     printf "\t\tCalculation chi1 of H148........." 
     if [[ ! -f chi1_his148/$MOLEC.angaver.xvg || ! -f chi1_his148/$MOLEC.angdist.xvg ]] ; then 
@@ -728,6 +783,8 @@ analyze_hbond_nit
 force_calc
 force_calc_APBS 
 sasa
+rmsd 
+r_gyrate
 #chi1_his148
 #chi1_cnf
 cd ../
