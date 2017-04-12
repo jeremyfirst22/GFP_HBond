@@ -24,8 +24,9 @@ for state in ['A','B'] :
         fileName="%s_State/%s/sasa/%s.cnf.xvg"%(state,name,name)
         if os.path.isfile(fileName) : 
             data = np.genfromtxt(fileName,skip_header=23)
-            sasas[index] = np.average(data[:,2]) 
-            stds[index] = np.std(data[:,2]) 
+            ##Step size is 4 ps. 2500 frames is 10 ns. Discarded as equiibration time. 
+            sasas[index] = np.average(data[2500:,2]) 
+            stds[index] = np.std(data[2500:,2]) 
         else : 
             print "%s file not found! "%fileName 
             sys.exit() 
