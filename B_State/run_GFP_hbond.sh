@@ -784,6 +784,7 @@ force_calc
 force_calc_APBS
 sasa
 rmsd
+r_gyrate
 #chi1_his148
 #chi1_cnf
 cd ../
