@@ -52,7 +52,7 @@ for state in ['A','B'] :
     plt.plot(x,x*slope+intercept,label="r = %f"%r_value)
 
     plt.legend(loc=1,numpoints=1,fontsize='x-small')
-    plt.xlabel(r"SASA ($\AA^2$)") 
+    plt.xlabel(r"SASA (nm$^2$)") 
     plt.ylabel(r"$\frac{\partial \tilde{\nu}}{\partial T}$ (cm$^{-1}$ / K)") 
 
 
