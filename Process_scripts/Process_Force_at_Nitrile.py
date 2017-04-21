@@ -8,7 +8,7 @@ from scipy.stats import linregress
 from matplotlib import rc_file 
 
 force_dir='force_calc'
-save_dir='force_calc'
+save_dir='figures/force_calc'
 experimental_data='sasa_abs_data.dat'
 
 if not os.path.isdir(save_dir) : 

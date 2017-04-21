@@ -5,9 +5,9 @@ import os
 from os import sys
 from scipy.stats import linregress
 
-inFile='sasa_abs_data.dat'  
+inFile='Exp_data/sasa_abs_data.dat'  
 
-saveDir='sasa_vs_slopes' 
+saveDir='figures/sasa_vs_slopes' 
 
 if not os.path.isdir(saveDir) : 
     os.mkdir(saveDir)

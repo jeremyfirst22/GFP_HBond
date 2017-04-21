@@ -1,7 +1,12 @@
 import glob 
 import numpy as np 
 import matplotlib.pyplot as plt 
+import os
+from os import sys
 from matplotlib.colors import LogNorm
+
+if not os.path.isdir('figures') : 
+    os.mkdir('figures') 
 
 for state in ['A','B'] : 
     datafiles = glob.glob('%s_State/*/min_dist/cnf_water.xvg'%state) 
@@ -21,8 +26,9 @@ for state in ['A','B'] :
         ax.scatter(data[:,0],data[:,1],s=0.1) 
         ax.set_title(file.split('/')[1]) 
         ax.set_xlim([-5,55])
+        ax.set_ylim([1,8]) 
     
-    fig.savefig('Min_dist_%s.png'%state,format='png') 
+    fig.savefig('figures/Min_dist_%s.png'%state,format='png') 
     plt.close() 
     
     
