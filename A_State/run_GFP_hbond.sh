@@ -292,6 +292,31 @@ analyze_hbond_nit(){
     check HBond_nit/$MOLEC.hb_count.xvg 
 }
 
+min_dist(){
+    printf "\t\tCalculating min_dist to water...."
+    if [ ! -s min_dist/cnf_water.xvg ] ; then 
+        create_dir min_dist
+        cd min_dist
+    
+        if [ ! -f cnf_water.ndx ] ; then 
+            echo "resname CNF and name NH" > selection.dat 
+            echo "group Water and (name HW1 or name HW2)" >> selection.dat 
+
+            cat selection.dat | gmx select -s ../Production/$MOLEC.production.tpr -f ../Production/$MOLEC.production.nopbc.xtc -on cnf_water.ndx >> $logFile 2>> $errFile 
+            fi 
+        check cnf_water.ndx 
+
+        echo '0 1' | gmx mindist -f ../Production/$MOLEC.production.nopbc.xtc -n cnf_water.ndx -xvg none -od cnf_water.xvg >> $logFile 2>> $errFile
+
+        check cnf_water.xvg 
+        printf "Success\n" 
+        clean 
+        cd ../
+    else 
+        printf "Skipped\n" 
+        fi 
+} 
+
 analyze_hbond_nit_120(){
     printf "\t\tAnaylzing HBond_nit content......"
     if [ ! -s HBond_nit_120/$MOLEC.hb_count.xvg ] ; then 
@@ -778,12 +803,13 @@ solvent_min
 production_run 
 analyze_hbond
 analyze_hbond_nit
+min_dist
 #analyze_hbond_nit_120
 #analyze_hbond_nit_60 
 force_calc
-force_calc_APBS 
+force_calc_APBS
 sasa
-rmsd 
+rmsd
 r_gyrate
 #chi1_his148
 #chi1_cnf
