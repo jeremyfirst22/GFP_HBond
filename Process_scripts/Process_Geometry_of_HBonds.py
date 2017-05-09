@@ -2,6 +2,10 @@ import glob
 import numpy as np 
 import matplotlib.pyplot as plt 
 from matplotlib.colors import LogNorm
+import os
+
+figCols=4
+figRows=3
 
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
@@ -9,7 +13,7 @@ if not os.path.isdir('figures') :
 for state in ['A','B'] : 
     datafiles = glob.glob('%s_State/*/HBond_nit/*.geometry.xvg'%state) 
     
-    fig, axarr = plt.subplots(2,4,sharex='col',sharey='row') 
+    fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
     fig.subplots_adjust(wspace=0) 
     fig.text(0.5,0.04, "Time (ns)", ha='center', va='center') 
     fig.text(0.08,0.5, "HBond Angle", ha='center', va='center',rotation='vertical') 
@@ -21,7 +25,7 @@ for state in ['A','B'] :
         for i in range(len(data[:,2]))  : 
             if data[i,3] > 180 : 
                 data[i,3] -= 180 
-        ax = axarr[index/4,index%4]
+        ax = axarr[index/figCols,index%figCols]
     
         ax.scatter(data[:,0],data[:,3],s=0.1) 
         ax.set_title(file.split('/')[1]) 
@@ -31,7 +35,7 @@ for state in ['A','B'] :
     plt.close() 
     
     
-    fig, axarr = plt.subplots(2,4,sharex='col',sharey='row') 
+    fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
     fig.subplots_adjust(wspace=0) 
     fig.text(0.5,0.04, "Time (ns)", ha='center', va='center') 
     fig.text(0.08,0.5, r"HBond Length $\AA$", ha='center', va='center',rotation='vertical') 
@@ -43,7 +47,7 @@ for state in ['A','B'] :
         for i in range(len(data[:,3]))  : 
             if data[i,3] > 180 : 
                 data[i,3] -= 180 
-        ax = axarr[index/4,index%4]
+        ax = axarr[index/figCols,index%figCols]
     
         ax.scatter(data[:,0],data[:,2],s=0.1) 
         ax.set_title(file.split('/')[1]) 
@@ -52,7 +56,7 @@ for state in ['A','B'] :
     fig.savefig('figures/Geometries_length_%s.png'%state,format='png') 
     plt.close()
     
-    fig, axarr = plt.subplots(2,4,sharex='col',sharey='row') 
+    fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
     fig.subplots_adjust(wspace=0) 
     fig.text(0.5,0.04, r"HBond Length ($\AA$)", ha='center', va='center') 
     fig.text(0.08,0.5, r"HBond Angle (deg)", ha='center', va='center',rotation='vertical') 
@@ -64,7 +68,7 @@ for state in ['A','B'] :
         for i in range(len(data[:,3]))  : 
             if data[i,3] > 180 : 
                 data[i,3] -= 180 
-        ax = axarr[index/4,index%4]
+        ax = axarr[index/figCols,index%figCols]
     
         print file.split('/')[1], "\t", len(data[:,3]) 
         ax.scatter(data[:,2],data[:,3],s=0.05) 
@@ -76,7 +80,7 @@ for state in ['A','B'] :
     fig.savefig('figures/Geometries_2D_%s.png'%state,format='png') 
     plt.close() 
     
-    fig, axarr = plt.subplots(2,4,sharex='col',sharey='row') 
+    fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
     fig.subplots_adjust(wspace=0) 
     fig.text(0.5,0.04, r"HBond Length ($\AA$)", ha='center', va='center') 
     fig.text(0.08,0.5, r"HBond Angle (deg)", ha='center', va='center',rotation='vertical') 
@@ -89,7 +93,7 @@ for state in ['A','B'] :
         for i in range(len(data[:,3]))  : 
             if data[i,3] > 180 : 
                 data[i,3] -= 180 
-        ax = axarr[index/4,index%4]
+        ax = axarr[index/figCols,index%figCols]
     
         x = data[:,2] ; y = data[:,3]
         counts,  xbins,  ybins  = np.histogram2d(x, y) #,bins=(64,64)) 
