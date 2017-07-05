@@ -214,30 +214,23 @@ production_run(){
 
 analyze_hbond(){
     printf "\t\tAnalyzing Hbond content.........." 
-    if [[ ! -f HBond/cnf_num.xvg || ! -f HBond/cro_num.xvg ]] ; then 
-        create_dir HBond
-        cd HBond
-    
-        if [ ! -f cnf_num.xvg ] ; then 
+    if [ ! -f hbond/rates.txt ] ; then 
+        create_dir hbond
+        cd hbond
+        
+        touch empty.ndx 
+        if [ ! -f cnf_nh.xvg ] ; then 
             echo "r CNF & a NH" > selection.dat 
+            echo "! r CNF" >> selection.dat
             echo "q" >> selection.dat 
-            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.gro -o cnf_nh.ndx >> $logFile 2>> $errFile 
-            check cnf_nh.ndx 
+            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.gro -o cnf_nh.ndx -n empty.ndx >> $logFile 2>> $errFile
+            check cnf_nh.ndx
 
-            echo '18 14 18' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 1 -r 0.3 -a 20 -num cnf_num.xvg -life cnf_hblife.xvg >> $logFile 2>> $errFile 
+            echo '0 1 0' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cnf_nh.ndx -shell 0.5 -r 0.3 -da -num -ac -ang -dist -don -dan > hbond.log 2>> $errFile 
             fi 
-        check cnf_num.xvg 
-            
-        if [ ! -f cro_num.xvg ] ; then 
-            echo "r CROa & a OH or a HO" > selection.dat 
-            echo "r CROa & a OH" >> selection.dat
-            echo "q" >> selection.dat 
-            cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.production.gro -o cro_o_h.ndx >> $logFile 2>> $errFile
-            check cro_o_h.ndx
-
-            echo '18 14 19' | gmx hbond -f ../Production/$MOLEC.production.xtc -s ../Production/$MOLEC.production.tpr -n cro_o_h.ndx -shell 1 -r 0.3 -a 20 -num cro_num.xvg >> $logFile 2>> $errFile 
-            fi 
-        check cro_num.xvg
+        check hbnum.xvg danum.xvg donor.xvg hbac.xvg hbang.xvg hbdist.xvg 
+         
+        grep -A 100 "Doing autocorrelation according to the theory of Luzar and Chandler." hbond.log > rates.txt  
 
         clean
         printf "Success\n" 
@@ -316,98 +309,6 @@ min_dist(){
         printf "Skipped\n" 
         fi 
 } 
-
-analyze_hbond_nit_120(){
-    printf "\t\tAnaylzing HBond_nit content......"
-    if [ ! -s HBond_nit_120/$MOLEC.hb_count.xvg ] ; then 
-        create_dir HBond_nit_120
-        cd HBond_nit_120
-
-    if [ ! -d ../Production/amber03.ff ] ; then 
-        cp $FF/*.dat ../Production/. 
-        cp -r $FF/amber03.ff ../Production/.
-        fi 
-    check ../Production/amber03.ff/forcefield.itp 
-
-        ## We use veriosn 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
-        ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
-        ## atoms this should not matter. 
-        if [ ! -f $MOLEC.production.v4.tpr ] ; then 
-            grompp -f $MDP/production_gfp.mdp -o $MOLEC.production.v4.tpr -p ../Production/$MOLEC.neutral.top -c ../Production/$MOLEC.npt_relax.gro -maxwarn 3 >> $logFile 2>> $errFile 
-            fi
-        check $MOLEC.production.v4.tpr 
-    
-        CT=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep CT | awk '{print $3}'`
-        NH=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep NH | awk '{print $3}'`
-        #echo $CT $NH
-        
-        if [ ! -s $MOLEC.hb_count.xvg ] ; then  
-            $HOME/andrews_gmx/g_nitrile_hbond/g_nitrile_hbond \
-                -s $MOLEC.production.v4.tpr \
-                -f ../Production/$MOLEC.production.nopbc.xtc \
-                -a1 $CT -a2 $NH \
-                -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
-                -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
-                -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
-                -CNH_cutoff 120 >> $logFile 2>> $errFile 
-            check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
-        fi 
-        
-        check $MOLEC.hb_count.xvg 
-        printf "Success\n" 
-        clean
-        cd ../
-    else 
-        printf "Skipped\n" 
-        fi 
-    check HBond_nit_120/$MOLEC.hb_count.xvg 
-}
-
-analyze_hbond_nit_60(){
-    printf "\t\tAnaylzing HBond_nit content......"
-    if [ ! -s HBond_nit_60/$MOLEC.hb_count.xvg ] ; then 
-        create_dir HBond_nit_60
-        cd HBond_nit_60
-
-    if [ ! -d ../Production/amber03.ff ] ; then 
-        cp $FF/*.dat ../Production/. 
-        cp -r $FF/amber03.ff ../Production/.
-        fi 
-    check ../Production/amber03.ff/forcefield.itp 
-
-        ## We use veriosn 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
-        ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
-        ## atoms this should not matter. 
-        if [ ! -f $MOLEC.production.v4.tpr ] ; then 
-            grompp -f $MDP/production_gfp.mdp -o $MOLEC.production.v4.tpr -p ../Production/$MOLEC.neutral.top -c ../Production/$MOLEC.npt_relax.gro -maxwarn 3 >> $logFile 2>> $errFile 
-            fi
-        check $MOLEC.production.v4.tpr 
-    
-        CT=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep CT | awk '{print $3}'`
-        NH=`grep CNF ../Production/$MOLEC.production.nopbc.gro | grep NH | awk '{print $3}'`
-        #echo $CT $NH
-        
-        if [ ! -s $MOLEC.hb_count.xvg ] ; then  
-            $HOME/andrews_gmx/g_nitrile_hbond/g_nitrile_hbond \
-                -s $MOLEC.production.v4.tpr \
-                -f ../Production/$MOLEC.production.nopbc.xtc \
-                -a1 $CT -a2 $NH \
-                -select "resname SOL and same residue as within 0.5 of resname CNF and name NH" \
-                -o $MOLEC.frame_hb.xvg -op $MOLEC.persistent.xvg \
-                -oa $MOLEC.hb_count.xvg -or $MOLEC.geometry.xvg \
-                -CNH_cutoff 60 >> $logFile 2>> $errFile 
-            check $MOLEC.hb_count.xvg $MOLEC.geometry.xvg $MOLEC.persistent.xvg $MOLEC.frame_hb.xvg 
-        fi 
-        
-        check $MOLEC.hb_count.xvg 
-        printf "Success\n" 
-        clean
-        cd ../
-    else 
-        printf "Skipped\n" 
-        fi 
-    check HBond_nit_60/$MOLEC.hb_count.xvg 
-}
 
 force_calc(){
     printf "\n\t\tCalculating force:\n" 
@@ -795,24 +696,43 @@ chi1_cnf(){
         fi 
 } 
 
+chi(){
+    printf "\t\tCalculating dihedrals............" 
+    if [ ! -f chi/order.xvg ] ; then 
+        create_dir chi 
+        cd chi 
+        clean 
+
+        gmx chi -f ../Production/$MOLEC.production.xtc \
+            -s ../Production/$MOLEC.production.tpr \
+            -norad \
+            -rama >> $logFile 2>> $errFile 
+        check order.xvg 
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 printf "\n\t\t*** Program Beginning ***\n\n" 
 cd $MOLEC
 protein_min
 solvate
 solvent_min
 production_run 
-analyze_hbond
-analyze_hbond_nit
-min_dist
-#analyze_hbond_nit_120
-#analyze_hbond_nit_60 
-force_calc
-force_calc_APBS
-sasa
+if grep -sq CNF $MOLEC.pdb ; then 
+    analyze_hbond
+    analyze_hbond_nit
+    force_calc
+    force_calc_APBS
+    min_dist
+    sasa
+    fi 
 rmsd
 r_gyrate
-#chi1_his148
-#chi1_cnf
+chi
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
