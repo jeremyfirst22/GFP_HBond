@@ -32,4 +32,26 @@ for state in ['A','B'] :
     fig.savefig('figures/Persistant_hbonds_%s.png'%state,format='png') 
     plt.close() 
     
+    datafiles = glob.glob('%s_State/*/HBond/cnf_hblife.xvg'%state) 
     
+    fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
+    fig.subplots_adjust(wspace=0) 
+    fig.text(0.5,0.04, "Time (ns)", ha='center', va='center') 
+
+    for index,file in enumerate(datafiles) : 
+        data = np.genfromtxt(file,skip_header=23) 
+        try : 
+            data[:,0] = data[:,0] / 1000  ## ps -> ns
+        except : 
+            continue 
+    
+        ax = axarr[index/figCols,index%figCols]
+    
+        ax.plot(data[:,0],data[:,2]) 
+
+        ax.set_title(file.split('/')[1]) 
+        ax.set_xlim([0,0.05]) 
+        #ax.set_ylim([0,10]) 
+    
+    fig.savefig('figures/Persistant_lifetime_%s.png'%state,format='png') 
+    plt.close() 
