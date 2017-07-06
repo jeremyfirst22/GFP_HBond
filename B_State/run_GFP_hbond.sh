@@ -716,6 +716,26 @@ chi(){
         fi  
 } 
 
+minimage(){
+    printf "\t\tCalculating minimum image........" 
+    if [ ! -f minimage/mindist.xvg ] ; then 
+        create_dir minimage
+        cd minimage
+        clean 
+        
+        echo 'Protein' | gmx mindist -f ../Production/$MOLEC.production.xtc \
+            -s ../Production/$MOLEC.production.tpr \
+            -pi \
+            -od mindist.xvg >> $logFile 2>> $errFile 
+            check mindist.xvg 
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 printf "\n\t\t*** Program Beginning ***\n\n" 
 cd $MOLEC
 protein_min
@@ -733,6 +753,7 @@ if grep -sq CNF $MOLEC.pdb ; then
 rmsd
 r_gyrate
 chi
+minimage
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
