@@ -41,7 +41,8 @@ for state in ['A','B'] :
     
     index = 0
     for name in names : 
-        if (name == 'GFP_Y92X' or name == 'GFP_M218X') : 
+#        if (name == 'GFP_Y92X' or name == 'GFP_M218X' or name == 'GFP_D190X' ) : 
+        if (name == 'GFP_Y92X') : 
             sasas = np.delete(sasas,index, None)
             slopes= np.delete(slopes,index, None)
             print "%s deleted"%name 
