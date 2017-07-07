@@ -105,7 +105,7 @@ solvate(){
         gmx pdb2gmx -f $MOLEC.solute_min.gro -o $MOLEC.gro -p $MOLEC.top -water tip3p -ff amber03 >> $logFile 2>> $errFile 
         check $MOLEC.gro $MOLEC.top 
         
-        gmx editconf -f $MOLEC.gro -bt octahedron -box 8 -o temp.centered.gro >> $logFile 2>> $errFile 
+        gmx editconf -f $MOLEC.gro -bt octahedron -d 1.0 -o temp.centered.gro >> $logFile 2>> $errFile 
         check temp.centered.gro 
         
         gmx solvate -cp temp.centered.gro -o temp.solvated.gro >> $logFile 2>> $errFile  
@@ -742,18 +742,18 @@ protein_min
 solvate
 solvent_min
 production_run 
-if grep -sq CNF $MOLEC.pdb ; then 
-    analyze_hbond
-    analyze_hbond_nit
-    force_calc
-    force_calc_APBS
-    min_dist
-    sasa
-    fi 
-rmsd
-r_gyrate
-chi
-minimage
+#if grep -sq CNF $MOLEC.pdb ; then 
+#    analyze_hbond
+#    analyze_hbond_nit
+#    force_calc
+#    force_calc_APBS
+#    min_dist
+#    sasa
+#    fi 
+#rmsd
+#r_gyrate
+#chi
+#minimage
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
