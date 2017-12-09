@@ -28,50 +28,50 @@ except IndexError :
 
 
 
-for state in 'A', 'B' : 
-    datafiles = glob.glob('%s_State/*/gyrate/*.gyrate.xvg'%state) 
-    index=0
-    for datafile in datafiles : 
-        molec = datafile.split('/')[1]
-        datafile2 = "%s_State/%s/rmsd/%s.crystal.xvg"%(state,molec,molec) 
-        print index, index/figCols, index%figRows
-        ax = axarr[index/figCols,index%figCols]
+datafiles = glob.glob('B_State/*/rgyr/without_ter.xvg') 
+index=0
+for datafile in datafiles : 
+    molec = datafile.split('/')[1]
+    datafile2 = "B_State/%s/rmsd/without_ter.xvg"%molec
+    print index, index/figCols, index%figRows
+    ax = axarr[index/figCols,index%figCols]
+
+    print datafile
+    try : 
+        data = np.genfromtxt(datafile,skip_header=25) 
+    except IOError : 
+        print "No gryate file found for %s"%(molec) 
+        continue
+    try : 
+        data2= np.genfromtxt(datafile2,skip_header=16) 
+    except IOError : 
+        print "No RMSD file found for %s"%(molec) 
+        continue
+
+    x = data[:,1] * 10 # nm -> Angstroms
+    y = data2[:,1] * 10 
+    print len(x), len(y) 
+    assert len(x) == len(y) 
+
+    while len(x) % binSize != 0 : 
+        x = x[:-1]
+        y = y[:-1]
+    assert len(x) % binSize == 0 
+    assert len(y) % binSize == 0 
     
-        print datafile
-        try : 
-            data = np.genfromtxt(datafile,skip_header=25) 
-        except IOError : 
-            print "No gryate file found for %s"%(molec) 
-            continue
-        try : 
-            data2= np.genfromtxt(datafile2,skip_header=16) 
-        except IOError : 
-            print "No RMSD file found for %s"%(molec) 
-            continue
-    
-        x = data[:,1] * 10 # nm -> Angstroms
-        y = data2[:,1] * 10 
-        print len(x), len(y) 
-        assert len(x) == len(y) 
-    
-        while len(x) % binSize != 0 : 
-            x = x[:-1]
-            y = y[:-1]
-        assert len(x) % binSize == 0 
-        assert len(y) % binSize == 0 
-        
-        xs = np.mean(x.reshape(-1,binSize),axis=1) 
-        ys = np.mean(y.reshape(-1,binSize),axis=1) 
-    
-        colors = cm.brg(np.linspace(0,1,len(ys)) ) 
-    
-        for x,y,c in zip(xs,ys,colors) : 
-            ax.scatter(x,y,s=0.1,color=c) 
-    
-        ax.set_title(molec) 
-        ax.set_xlim(17,17.6) 
-        ax.set_ylim(0,2.5) 
-    
-        index +=1
-    fig.savefig('figures/rmsd_v_rgyr_%s.png'%state,format='png') 
+    xs = np.mean(x.reshape(-1,binSize),axis=1) 
+    ys = np.mean(y.reshape(-1,binSize),axis=1) 
+
+    colors = cm.brg(np.linspace(0,1,len(ys)) ) 
+
+    ax.plot(x,y,color='k',linewidth=0.1,alpha=0.3) 
+    for x,y,c in zip(xs,ys,colors) : 
+        ax.scatter(x,y,s=0.9,color=c,marker='o') 
+
+    ax.set_title(molec) 
+    #ax.set_xlim(17,17.6) 
+    #ax.set_ylim(0,2.5) 
+
+    index +=1
+fig.savefig('figures/rmsd_v_rgyr.png',format='png') 
 
