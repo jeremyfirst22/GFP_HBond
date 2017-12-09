@@ -2,6 +2,7 @@
 
 molecList="GFP_Y92X GFP_F114X GFP_Y143X GFP_F145X GFP_Y149X GFP_F165X GFP_N212X GFP_M218X 
 GFP_D117X GFP_D190X GFP_N198X GFP_WT" 
+#molecList="GFP_D190X GFP_Y149X"
 
 for molec in $molecList ; do 
     if [ ! -f StartingStructures/$molec.pdb ] ; then 

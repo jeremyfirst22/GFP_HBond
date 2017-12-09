@@ -289,14 +289,14 @@ production(){
 
 hbond(){
     printf "\t\tAnalyzing hydrogen bonds.................." 
-    if [ ! -f hbond/all_hbnum.xvg ] ; then 
+    if [ ! -f hbond/geometry.xvg ] ; then 
         create_dir hbond
         cp Production/solvent_npt.gro hbond/. 
         cp Production/neutral.top hbond/. 
         cp Production/*.itp hbond/. 
         cd hbond
         
-        ##Version 4 tpr required for Andrew's nitrile code
+        ##Version 4 tpr required for custom built nitrile code
         grompp -f $MDP/vac_md.mdp \
             -c solvent_npt.gro \
             -p neutral.top \
@@ -306,51 +306,54 @@ hbond(){
 
         CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
         NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
-        ~/andrews_gmx/g_nitrile_hbond/g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
             -s v4.tpr \
-            -select 'resname SOL and same residue as within 0.5 of resname CNF and name NE' \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
             -a1 $CT \
             -a2 $NH \
             -op persistent.xvg \
             -or geometry.xvg \
+            -oa hb_count.xvg \
+            -onwr nw_geometry.xvg \
             -o frame_hb.xvg >> $logFile 2>> $errFile 
         check frame_hb.xvg geometry.xvg persistent.xvg 
 
         clean
         rm solvent_npt.gro neutral.top *.itp 
    
-        echo "r CNF & a NH" > selection.dat 
-        echo "r SOL" >> selection.dat 
-        echo "!r CNF" >> selection.dat  
-        echo "q" >> selection.dat  
-
-        touch empty.ndx 
-        cat selection.dat | gmx make_ndx -f ../Production/solvent_npt.gro \
-            -n empty.ndx \
-            -o index.ndx >> $logFile 2>> $errFile 
-        check index.ndx 
-
-        echo '0 1 0' | gmx hbond -f ../Production/$MOLEC.xtc \
-            -s ../Production/$MOLEC.tpr \
-            -n index.ndx \
-            -shell 1.0 \
-            -ac wat_hbac.xvg \
-            -dist wat_hbdist.xvg \
-            -ang wat_hbang.xvg \
-            -life wat_hblife.xvg \
-            -num wat_hbnum.xvg >> $logFile 2>> $errFile 
-        check wat_hbnum.xvg 
-
-        echo '0 2 0' | gmx hbond -f ../Production/$MOLEC.xtc \
-            -s ../Production/$MOLEC.tpr \
-            -n index.ndx \
-            -shell 1.0 \
-            -ac all_hbac.xvg \
-            -dist all_hbdist.xvg \
-            -ang all_hbang.xvg \
-            -life all_hblife.xvg \
-            -num all_hbnum.xvg >> $logFile 2>> $errFile 
-        check all_hbnum.xvg 
+#        echo "r CNF & a NH" > selection.dat 
+#        echo "r SOL" >> selection.dat 
+#        echo "!r CNF" >> selection.dat  
+#        echo "q" >> selection.dat  
+#
+#        touch empty.ndx 
+#        cat selection.dat | gmx make_ndx -f ../Production/solvent_npt.gro \
+#            -n empty.ndx \
+#            -o index.ndx >> $logFile 2>> $errFile 
+#        check index.ndx 
+#
+#        echo '0 1 0' | gmx hbond -f ../Production/$MOLEC.xtc \
+#            -s ../Production/$MOLEC.tpr \
+#            -n index.ndx \
+#            -shell 1.0 \
+#            -dist wat_hbdist.xvg \
+#            -ang wat_hbang.xvg \
+#            -num wat_hbnum.xvg >> $logFile 2>> $errFile 
+#            #-ac wat_hbac.xvg \
+#            #-life wat_hblife.xvg \
+#        check wat_hbnum.xvg 
+#
+#        echo '0 2 0' | gmx hbond -f ../Production/$MOLEC.xtc \
+#            -s ../Production/$MOLEC.tpr \
+#            -n index.ndx \
+#            -shell 1.0 \
+#            -ac all_hbac.xvg \
+#            -dist all_hbdist.xvg \
+#            -ang all_hbang.xvg \
+#            -life all_hblife.xvg \
+#            -num all_hbnum.xvg >> $logFile 2>> $errFile 
+#        check all_hbnum.xvg 
 
         printf "Success\n" 
         cd ../
@@ -358,6 +361,51 @@ hbond(){
         printf "Skipped\n"
         fi  
 } 
+
+sasa(){
+    printf "\t\tAnalyzing SASA of CNF....................." 
+    if [ ! -f sasa/nit_4_atoms_area.xvg ] ; then 
+        create_dir sasa
+        cd sasa
+        clean 
+
+        if [ ! -s cnf_area.xvg ] ; then 
+            gmx sasa -f ../Production/$MOLEC.xtc \
+                -s ../Production/$MOLEC.tpr \
+                -surface 'Protein' \
+                -output 'resname CNF' \
+                -ndots 240 \
+                -or cnf_resarea.xvg \
+                -o cnf_area.xvg >> $logFile 2>> $errFile 
+            fi 
+        check cnf_area.xvg 
+
+        if [ ! -s nh_ct_area.xvg ] ; then 
+            gmx sasa -f ../Production/$MOLEC.xtc \
+                -s ../Production/$MOLEC.tpr \
+                -surface 'Protein' \
+                -output 'resname CNF and (name NH or name CT)' \
+                -ndots 240 \
+                -o nh_ct_area.xvg >> $logFile 2>> $errFile
+            fi 
+        check nh_ct_area.xvg 
+
+        if [ ! -s nit_4_atoms_area.xvg ] ; then 
+            gmx sasa -f ../Production/$MOLEC.xtc \
+                -s ../Production/$MOLEC.tpr \
+                -surface 'Protein' \
+                -output 'resname CNF and (name NH or name CT or name CZ or name CE1 or name CE2)' \
+                -ndots 240 \
+                -o nit_4_atoms_area.xvg >> $logFile 2>> $errFile
+            fi 
+        check nit_4_atoms_area.xvg 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi 
+}
 
 minimage(){
     printf "\t\tCalculating minimum image................." 
@@ -379,6 +427,36 @@ minimage(){
         fi  
 } 
 
+mindist(){
+    printf "\t\tCalculating mindist to water.............." 
+    if [ ! -f mindist/mindist.xvg ] ; then 
+        create_dir mindist
+        cd mindist
+        clean 
+        
+        touch empty.ndx 
+        echo "r CNF & a NH" > selection.dat 
+        echo "r SOL & a OW" >> selection.dat 
+        echo "q" >> selection.dat 
+
+        cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.gro \
+            -n empty.ndx \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+
+        echo '0 1' | gmx mindist -f ../Production/$MOLEC.nopbc.xtc \
+            -s ../Production/$MOLEC.tpr \
+            -n index.ndx \
+            -od mindist.xvg >> $logFile 2>> $errFile 
+        check mindist.xvg
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 rmsd(){
     printf "\t\tCalculating RMSD.........................." 
     if [ ! -f rmsd/without_ter.xvg ] ; then 
@@ -391,14 +469,14 @@ rmsd(){
             -o backbone.xvg >> $logFile 2>> $errFile 
         check backbone.xvg 
 
-        echo '"Backbone" & ri 6-130' > selection.dat 
+        echo '"Backbone" & ri 11-225' > selection.dat 
         echo "q" >> selection.dat 
 
         cat selection.dat | gmx make_ndx -f ../Production/solvent_npt.gro \
             -o index.ndx >> $logFile 2>> $errFile 
         check index.ndx 
         
-        echo "Backbone_&_r_6_130 Backbone_&_r_6_130" | gmx rms -f ../Production/$MOLEC.xtc \
+        echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx rms -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
             -n index.ndx \
             -o without_ter.xvg >> $logFile 2>> $errFile 
@@ -433,7 +511,7 @@ chi(){
 
 rgyr(){
     printf "\t\tCalculating radius of gyration............" 
-    if [ ! -f rgyr/gyrate.xvg ] ; then 
+    if [ ! -f rgyr/without_ter.xvg ] ; then 
         create_dir rgyr
         cd rgyr
         clean 
@@ -442,6 +520,19 @@ rgyr(){
             -s ../Production/$MOLEC.tpr \
             -o gyrate.xvg >> $logFile 2>> $errFile 
         check gyrate.xvg
+
+        echo '"Backbone" & ri 11-225' > selection.dat 
+        echo "q" >> selection.dat 
+
+        cat selection.dat | gmx make_ndx -f ../Production/solvent_npt.gro \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+        
+        echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx gyrate -f ../Production/$MOLEC.xtc \
+            -s ../Production/$MOLEC.tpr \
+            -n index.ndx \
+            -o without_ter.xvg >> $logFile 2>> $errFile 
+        check without_ter.xvg
 
         printf "Success\n" 
         cd ../
@@ -458,13 +549,15 @@ solvent_steep
 solvent_nvt
 solvent_npt
 production 
-#if grep -sq CNF $MOLEC.pdb ; then 
-#    hbond 
-#    fi 
+if grep -sq CNF $MOLEC.pdb ; then 
+    hbond 
+    sasa
+    fi 
 #minimage
-#rmsd 
-#chi
-#rgyr
+mindist 
+rmsd 
+chi
+rgyr
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 
