@@ -364,7 +364,7 @@ hbond(){
 
 sasa(){
     printf "\t\tAnalyzing SASA of CNF....................." 
-    if [ ! -f sasa/nit_4_atoms_area.xvg ] ; then 
+    if [ ! -f sasa/sidechain.xvg ] ; then 
         create_dir sasa
         cd sasa
         clean 
@@ -400,8 +400,51 @@ sasa(){
             fi 
         check nit_4_atoms_area.xvg 
 
+        if [ ! -s sidechain.xvg ] ; then 
+            gmx sasa -f ../Production/$MOLEC.xtc \
+                -s ../Production/$MOLEC.tpr \
+                -surface 'Protein' \
+                -output 'group "SideChain" and resname CNF' \
+                -ndots 240 \
+                -o sidechain.xvg >> $logFile 2>> $errFile
+            fi 
+        check nh_ct_area.xvg 
+
         printf "Success\n" 
         cd ../
+    else
+        printf "Skipped\n"
+        fi 
+}
+
+sorient(){
+    printf "\t\tCalculating orientation of solvent........" 
+    if [ ! -f sorient/sori.xvg ] ; then 
+        create_dir sorient
+        cd sorient
+        clean 
+        
+        touch empty.ndx 
+        echo "r CNF & a NH" > selection.dat 
+        echo "r SOL" >> selection.dat 
+        echo "q" >> selection.dat 
+        cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.tpr \
+            -n empty.ndx \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+
+        echo '0 1' | gmx sorient -f ../Production/$MOLEC.xtc \
+            -s ../Production/$MOLEC.tpr \
+            -n index.ndx \
+            -no snor.xvg \
+            -ro sord.xvg \
+            -co scum.xvg \
+            -rc scount.xvg \
+            -o sori.xvg >> $logFile 2>> $errFile 
+            check sori.xvg snor.xvg sord.xvg scum.xvg scount.xvg 
+
+        printf "Success\n" 
+        cd ../ 
     else
         printf "Skipped\n"
         fi 
@@ -552,9 +595,10 @@ production
 if grep -sq CNF $MOLEC.pdb ; then 
     hbond 
     sasa
+    mindist 
+    sorient
     fi 
-#minimage
-mindist 
+minimage
 rmsd 
 chi
 rgyr
