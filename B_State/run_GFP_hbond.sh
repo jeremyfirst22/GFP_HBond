@@ -362,6 +362,73 @@ hbond(){
         fi  
 } 
 
+fit_hbond(){
+    printf "\t\tFitting hbond analysia...................." 
+    if [ ! -f hbond/geometry.xvg ] ; then 
+        printf "Skipping\n"  
+        break 
+        fi 
+
+    if [ ! -f ~/normal_distribution/tiltAngle ] ; then 
+        printf "Skipping\n" 
+        break 
+        fi     
+
+    if [ ! -f fit_hbond/geometry.poly ] ; then 
+        create_dir fit_hbond
+        cp hbond/*geometry.xvg fit_hbond/. 
+        cd fit_hbond
+        clean 
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > clean_dist.dat 
+        check clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_dist.dat -o dist.his -g dist.gaus -p dist.poly 
+        check dist.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > clean_theta1.dat 
+        check clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta1.dat -o theta1.his -g theta1.gaus -p theta1.poly 
+        check theta1.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > clean_theta2.dat 
+        check clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta2.dat -o theta2.his -g theta2.gaus -p theta2.poly 
+        check theta2.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > nw_clean_dist.dat 
+        check nw_clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_dist.dat -o nw_dist.his -g nw_dist.gaus -p nw_dist.poly 
+        check nw_dist.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > nw_clean_theta1.dat 
+        check nw_clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta1.dat -o nw_theta1.his -g nw_theta1.gaus -p nw_theta1.poly 
+        check nw_theta1.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > nw_clean_theta2.dat 
+        check nw_clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta2.dat -o nw_theta2.his -g nw_theta2.gaus -p nw_theta2.poly 
+        check nw_theta2.poly
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 sasa(){
     printf "\t\tAnalyzing SASA of CNF....................." 
     if [ ! -f sasa/sidechain.xvg ] ; then 
@@ -594,6 +661,7 @@ solvent_npt
 production 
 if grep -sq CNF $MOLEC.pdb ; then 
     hbond 
+    fit_hbond
     sasa
     mindist 
     sorient
