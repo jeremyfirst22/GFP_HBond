@@ -309,6 +309,7 @@ hbond(){
         source /usr/local/gromacs/bin/GMXRC
         g_nitrile_hbond -f ../Production/$MOLEC.xtc \
             -s v4.tpr \
+            -b 10000 \
             -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
             -a1 $CT \
             -a2 $NH \
@@ -362,6 +363,211 @@ hbond(){
         fi  
 } 
 
+hbond_1(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 1..." 
+    if [ ! -f hbond_1/persistent.xvg ] ; then 
+        create_dir hbond_1
+        cp Production/solvent_npt.gro hbond_1/. 
+        cp Production/neutral.top hbond_1/. 
+        cp Production/*.itp hbond_1/. 
+        cd hbond_1
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 1 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+hbond_2(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 2..." 
+    if [ ! -f hbond_2/persistent.xvg ] ; then 
+        create_dir hbond_2
+        cp Production/solvent_npt.gro hbond_2/. 
+        cp Production/neutral.top hbond_2/. 
+        cp Production/*.itp hbond_2/. 
+        cd hbond_2
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 2 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+hbond_3(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 3..." 
+    if [ ! -f hbond_3/persistent.xvg ] ; then 
+        create_dir hbond_3
+        cp Production/solvent_npt.gro hbond_3/. 
+        cp Production/neutral.top hbond_3/. 
+        cp Production/*.itp hbond_3/. 
+        cd hbond_3
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 3 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+hbond_4(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 4..." 
+    if [ ! -f hbond_4/persistent.xvg ] ; then 
+        create_dir hbond_4
+        cp Production/solvent_npt.gro hbond_4/. 
+        cp Production/neutral.top hbond_4/. 
+        cp Production/*.itp hbond_4/. 
+        cd hbond_4
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 4 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+hbond_5(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 5..." 
+    if [ ! -f hbond_5/persistent.xvg ] ; then 
+        create_dir hbond_5
+        cp Production/solvent_npt.gro hbond_5/. 
+        cp Production/neutral.top hbond_5/. 
+        cp Production/*.itp hbond_5/. 
+        cd hbond_5
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 5 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 fit_hbond(){
     printf "\t\tFitting hbond analysia...................." 
     if [ ! -f hbond/geometry.xvg ] ; then 
@@ -374,7 +580,7 @@ fit_hbond(){
         break 
         fi     
 
-    if [ ! -f fit_hbond/geometry.poly ] ; then 
+    if [ ! -f fit_hbond/nw_theta2.poly ] ; then 
         create_dir fit_hbond
         cp hbond/*geometry.xvg fit_hbond/. 
         cd fit_hbond
@@ -576,6 +782,7 @@ rmsd(){
 
         echo 'Backbone Backbone' | gmx rms -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
+            -b 10000 \
             -o backbone.xvg >> $logFile 2>> $errFile 
         check backbone.xvg 
 
@@ -589,6 +796,7 @@ rmsd(){
         echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx rms -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
             -n index.ndx \
+            -b 10000 \
             -o without_ter.xvg >> $logFile 2>> $errFile 
         check without_ter.xvg
 
@@ -608,6 +816,7 @@ chi(){
 
         gmx chi -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
+            -b 10000 \
             -norad \
             -rama >> $logFile 2>> $errFile 
         check order.xvg 
@@ -641,6 +850,7 @@ rgyr(){
         echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx gyrate -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
             -n index.ndx \
+            -b 10000 \
             -o without_ter.xvg >> $logFile 2>> $errFile 
         check without_ter.xvg
 
@@ -661,6 +871,11 @@ solvent_npt
 production 
 if grep -sq CNF $MOLEC.pdb ; then 
     hbond 
+    hbond_1
+    hbond_2
+    hbond_3
+    hbond_4
+    hbond_5
     fit_hbond
     sasa
     mindist 
