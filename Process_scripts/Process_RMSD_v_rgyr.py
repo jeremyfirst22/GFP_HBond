@@ -16,7 +16,7 @@ if not os.path.isdir('figures') :
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0) 
 fig.text(0.5,0.04, r"R$_g$ ($\AA$)", ha='center', va='center') 
-fig.text(0.08,0.5, r"RMSD ($\AA$)", ha='center', va='center',rotation='vertical') 
+fig.text(0.03,0.5, r"RMSD ($\AA$)", ha='center', va='center',rotation='vertical') 
 
 try : 
     binSize = int(sys.argv[1] ) 
@@ -68,9 +68,9 @@ for datafile in datafiles :
     for x,y,c in zip(xs,ys,colors) : 
         ax.scatter(x,y,s=0.9,color=c,marker='o') 
 
-    ax.set_title(molec) 
-    #ax.set_xlim(17,17.6) 
-    #ax.set_ylim(0,2.5) 
+    ax.set_title(molec.split('_')[1])  
+    ax.set_xlim(16.5,17.25) 
+    ax.set_ylim(0.5,2.5) 
 
     index +=1
 fig.savefig('figures/rmsd_v_rgyr.png',format='png') 

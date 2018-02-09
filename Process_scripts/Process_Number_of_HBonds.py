@@ -5,7 +5,7 @@ from matplotlib.colors import LogNorm
 import os
 from sys import exit
 
-figCols=4
+figCols=3
 figRows=3
 
 if not os.path.isdir('figures') : 
@@ -16,7 +16,7 @@ datafiles = glob.glob('B_State/*/hbond/hb_count.xvg')
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0,hspace=0.3) 
 fig.subplots_adjust(left=0.1,right=0.8, bottom=0.1,top=0.9) 
-fig.text(0.5,0.04, "Time (ns)", ha='center', va='center') 
+fig.text(0.5,0.04, "Number per frame", ha='center', va='center') 
 fig.text(0.04,0.5, "Counts (x1000)", rotation='vertical',ha='center', va='center') 
 
 for index,file in enumerate(datafiles) : 
@@ -39,13 +39,14 @@ for index,file in enumerate(datafiles) :
     #    ax.plot(data[:,0]+i, data[:,i+1] ) 
     ax.bar(data[:,0]-1*width,data[:,2],barwidth,color='b',label='Water') 
     ax.bar(data[:,0]+0*width,data[:,5],barwidth,color='g',label='Protein') 
-    ax.bar(data[:,0]+1*width,data[:,6],barwidth,color='k',label='Protein or Water') 
+    ax.bar(data[:,0]+1*width,data[:,1],barwidth,color='c',label='Nearby Water') 
+    #ax.bar(data[:,0]+1*width,data[:,6],barwidth,color='k',label='Protein or Water') 
 
 
-    ax.set_title(file.split('/')[1]) 
+    ax.set_title(file.split('/')[1].split('_')[1]) 
     ax.set_xlim([0-2*width,3+2*width]) 
     ax.set_xticks(np.arange(0,4,1) ) 
-    #ax.set_ylim([0,10000]) 
+    ax.set_ylim([0,11 ]) 
     
     
 fig.legend(loc='center right',fontsize='x-small') 

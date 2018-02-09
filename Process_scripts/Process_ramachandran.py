@@ -7,13 +7,13 @@ from os.path import basename
 from matplotlib.colors import LogNorm
 import matplotlib.lines as mlines 
 
-figCols=4
+figCols=3
 figRows=3
 
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
 
-molecList=['GFP_Y92X', 'GFP_F114X', 'GFP_Y143X', 'GFP_F145X', 'GFP_Y149X', 'GFP_F165X', 'GFP_N212X', 'GFP_M218X', 'GFP_D117X', 'GFP_D190X', 'GFP_N198X'] 
+molecList=['GFP_Y92X', 'GFP_F114X', 'GFP_Y143X', 'GFP_F145X', 'GFP_F165X', 'GFP_N212X', 'GFP_M218X', 'GFP_D117X', 'GFP_N198X'] 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0) 
