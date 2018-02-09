@@ -597,7 +597,7 @@ fit_hbond(){
         cat geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > clean_theta1.dat 
         check clean_theta1.dat 
        
-        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta1.dat -o theta1.his -g theta1.gaus -p theta1.poly 
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta1.dat -o theta1.his -g theta1.gaus -p theta1.poly -n 81 
         check theta1.poly
 
         check geometry.xvg 
@@ -714,13 +714,44 @@ sorient(){
             -co scum.xvg \
             -rc scount.xvg \
             -o sori.xvg >> $logFile 2>> $errFile 
-            check sori.xvg snor.xvg sord.xvg scum.xvg scount.xvg 
+        check sori.xvg snor.xvg sord.xvg scum.xvg scount.xvg 
 
         printf "Success\n" 
         cd ../ 
     else
         printf "Skipped\n"
         fi 
+}
+
+rdf(){
+    printf "\t\tCalculating radial distribution funcs....." 
+    if [ ! -f rdf/wat_cnf.xvg ] ; then 
+        create_dir rdf
+        cd rdf
+        clean 
+
+        touch empty.ndx 
+        echo "r CNF & a NH" > selection.dat 
+        echo "r SOL & a OW" >> selection.dat 
+        echo "q" >> selection.dat 
+
+        cat selection.dat | gmx make_ndx -f ../Production/$MOLEC.tpr \
+            -n empty.ndx \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+
+        echo '0 1' | gmx rdf -f ../Production/$MOLEC.xtc \
+            -s ../Production/$MOLEC.tpr \
+            -n index.ndx \
+            -o wat_cnf.xvg >> $logFile 2>> $errFile 
+        check wat_cnf.xvg 
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi 
+
 }
 
 minimage(){
@@ -880,6 +911,7 @@ if grep -sq CNF $MOLEC.pdb ; then
     sasa
     mindist 
     sorient
+    rdf
     fi 
 minimage
 rmsd 
