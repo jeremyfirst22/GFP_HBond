@@ -30,6 +30,7 @@ logFile=$TOP/$MOLEC/$MOLEC.log
 errFile=$TOP/$MOLEC/$MOLEC.err 
 FF=$TOP/GMXFF
 forceField=amber03
+FORCE_TOOLS=/Users/jfirst/force_calc_tools
 if [ ! -d $FF/$forceField.ff ] ; then 
     echo ; echo "ERROR: FF not found" 
     exit
@@ -754,6 +755,158 @@ rdf(){
 
 }
 
+force_calc(){
+    printf "\n\t\tCalculating force:\n" 
+    if [[ ! -f force_calc/$MOLEC.solvent_rxn_field.projected.xvg || ! -f force_calc/$MOLEC.external_field.projected.xvg || ! -f force_calc/$MOLEC.total_field.xvg ]] ; then 
+
+        if [ ! -f $FORCE_TOOLS/g_insert_dummy_atom ] ; then 
+            printf "\t\t\tERROR: Force tools not found. Skipping force calc\n" 
+            return  
+            fi 
+
+        create_dir force_calc
+        cp Production/*.itp force_calc/. 
+        cp Production/neutral.top force_calc/. 
+        cp Production/solvent_npt.gro force_calc/. 
+        cp Solvate/neutral.gro force_calc/. 
+        cd force_calc 
+
+        ## We use version 4.6 of Gromacs for this grompp command, because g_insert_dummy is written for version 4.6
+        ## We allow for warnings, since we are generated .tpr from a gromacs 5 mdp file. We are only inserting
+        ## atoms this should not matter. 
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+        
+        CT=`grep CNF ../Production/$MOLEC.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF ../Production/$MOLEC.gro | grep NH | awk '{print $3}'`
+        #echo $CT $NH
+        
+        printf "\t\t\tInserting dummy atoms............................" 
+        if [ ! -s $MOLEC.with_dummy.xtc ] ; then 
+            source /usr/local/gromacs/bin/GMXRC
+            $FORCE_TOOLS/g_insert_dummy_atom -f ../Production/$MOLEC.nopbc.xtc \
+                -s v4.tpr \
+                -a1 $CT \
+                -a2 $NH \
+                -o $MOLEC.with_dummy.xtc >> $logFile 2>> $errFile 
+            check $MOLEC.with_dummy.xtc
+
+        ## We use the initial configuration so that titration states are conserved (ie, at the end of the production run, pdb2gmx might assign a different titration state to a histidine, which causes it to fail. 
+            if [ ! -s $MOLEC.with_dummy.gro ] ; then 
+                echo 'Protein System' | gmx trjconv -f neutral.gro \
+                    -s v4.tpr \
+                    -center \
+                    -ur compact \
+                    -pbc mol \
+                    -o $MOLEC.nopbc.gro >> $logFile 2>> $errFile 
+                check $MOLEC.nopbc.gro 
+
+                source /usr/local/gromacs/bin/GMXRC
+                $FORCE_TOOLS/g_insert_dummy_atom -f $MOLEC.nopbc.gro \
+                    -s v4.tpr \
+                    -a1 $CT \
+                    -a2 $NH \
+                    -o $MOLEC.with_dummy.gro >> $logFile 2>> $errFile 
+                fi 
+            check $MOLEC.with_dummy.gro 
+
+            if [ ! -s $MOLEC.with_dummy.top ] ; then 
+                gmx pdb2gmx -f $MOLEC.with_dummy.gro \
+                    -water tip3p \
+                    -ff amber03 \
+                    -p $MOLEC.with_dummy.top \
+                    -o $MOLEC.with_dummy.gro >> $logFile 2>> $errFile 
+                fi 
+            check $MOLEC.with_dummy.top 
+            printf "Done\n" 
+        else 
+            printf "Skipped\n" 
+            fi 
+        
+        ##Find new atom numbers 
+        CT=`grep CNF $MOLEC.with_dummy.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF $MOLEC.with_dummy.gro | grep NH | awk '{print $3}'`
+
+        echo "[ probe ]" > probe.ndx 
+        echo "$CT $NH" >> probe.ndx 
+
+        echo "[ protein ]" > protein.ndx 
+        grep -v TCHG $MOLEC.with_dummy.gro | grep -v SOL | grep -v HOH | grep -v NA | grep -v CL | tail -n+3 | sed '$d' | awk '{print $3}' >> protein.ndx 
+
+        cp $MOLEC.with_dummy.top $MOLEC.total_field.top 
+
+        if [ ! -s $MOLEC.solvent_rxn_field.top ] ; then 
+            $FORCE_TOOLS/zero_charges.py $MOLEC.with_dummy.top protein.ndx $MOLEC.solvent_rxn_field.top >> $logFile 2>> $errFile 
+            fi 
+
+        if [ ! -s $MOLEC.external_field.top ] ; then 
+            $FORCE_TOOLS/zero_charges.py $MOLEC.with_dummy.top probe.ndx $MOLEC.external_field.top >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.total_field.top $MOLEC.external_field.top $MOLEC.solvent_rxn_field.top 
+
+        for field in total_field external_field solvent_rxn_field ; do 
+            printf "\t\t%20s..." $field 
+
+            ##Extract forces 
+            if [ ! -s $MOLEC.$field.projected.xvg ] ; then 
+                printf "forces..." 
+                if [ ! -s $MOLEC.$field.xvg ] ; then 
+                    if [ ! -s $MOLEC.$field.tpr ] ; then 
+                        gmx grompp -f $MDP/rerun.mdp \
+                            -p $MOLEC.$field.top \
+                            -c $MOLEC.with_dummy.gro \
+                            -o $MOLEC.$field.tpr  >> $logFile 2>> $errFile 
+                        fi 
+                    check $MOLEC.$field.tpr 
+ 
+                    if [ ! -s $MOLEC.$field.trr ] ; then 
+                        gmx mdrun -s $MOLEC.$field.tpr \
+                            -rerun $MOLEC.with_dummy.xtc \
+                            -deffnm $MOLEC.$field >> $logFile 2>> $errFile 
+                        fi 
+                    check $MOLEC.$field.trr 
+
+                    echo 2 | gmx traj -f $MOLEC.$field.trr \
+                        -s $MOLEC.$field.tpr \
+                        -xvg none \
+                        -of $MOLEC.$field.xvg >> $logFile 2>> $errFile 
+                    rm $MOLEC.$field.trr 
+                fi 
+                check $MOLEC.$field.xvg 
+
+                ##extract postions for bond vector
+                printf "positions..." 
+                if [ ! -s $MOLEC.positions.xvg ] ; then 
+                    gmx traj -f $MOLEC.with_dummy.xtc \
+                        -s $MOLEC.$field.tpr \
+                        -n probe.ndx \
+                        -xvg none \
+                        -ox $MOLEC.positions.xvg >> $logFile 2>> $errFile 
+                    fi 
+                check $MOLEC.positions.xvg 
+
+                ##project force along bond vector 
+                printf "Projecting..." 
+                $FORCE_TOOLS/get_force.py $MOLEC.positions.xvg $MOLEC.$field.xvg $MOLEC.$field.projected.xvg 
+                check $MOLEC.$field.projected.xvg 
+                printf "Done\n"  
+            else 
+                printf "..................................Skipped\n" 
+                fi 
+            done 
+        check $MOLEC.total_field.projected.xvg $MOLEC.external_field.projected.xvg $MOLEC.solvent_rxn_field.projected.xvg 
+        clean 
+        cd ../
+    else 
+        printf "\t\t\t\t  ............Skipped\n" 
+        fi 
+    printf "\n" 
+}
+
 minimage(){
     printf "\t\tCalculating minimum image................." 
     if [ ! -f minimage/mindist.xvg ] ; then 
@@ -912,6 +1065,7 @@ if grep -sq CNF $MOLEC.pdb ; then
     mindist 
     sorient
     rdf
+    force_calc
     fi 
 minimage
 rmsd 
