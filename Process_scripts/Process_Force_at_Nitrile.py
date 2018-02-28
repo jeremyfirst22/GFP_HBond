@@ -7,9 +7,11 @@ from scipy.stats import linregress
 
 from matplotlib import rc_file 
 
-force_dir='force_calc'
 save_dir='figures/force_calc'
-experimental_data='sasa_abs_data.dat'
+experimental_data='Exp_data/sasa_abs_data.dat'
+
+figCols=4
+figRows=3
 
 if not os.path.isdir(save_dir) : 
     os.mkdir(save_dir) 
@@ -27,102 +29,150 @@ with open(experimental_data,'r') as f :
             continue 
         mutToExp[key] = value 
 
-mutExppKa={
-    'GFP_Y92X':[7.5,0.5],
-    'GFP_F114X':[7.5,0.5],
-    'GFP_Y143X':[7.5,0.5],
-    'GFP_F145X':[7.5,0.5],
-    'GFP_Y149X':[7.5,0.5],
-    'GFP_F165X':[7.5,0.5],
-    'GFP_N212X':[7.5,0.5],
-    'GFP_M218X':[7.5,0.5]
-} 
+nameToColorKeys = {
+        "GFP_F145X":'#A93226',
+        "GFP_M218X":'r',
+        "GFP_F165X":'#E67E22',
+        "GFP_F114X":'y',
+        "GFP_N198X":'#2ECC71',
+        "GFP_Y143X":'g',
+        "GFP_N212X":'c',
+        "GFP_D117X":'b',
+        "GFP_Y92X":'m'
+        }
 
-for force_type in ['external_field','solvent_rxn_field','total_field'] : 
-    ##Fine all force files 
-    force_files = glob.glob('[AB]_State/*/%s/*.%s.projected.xvg'%(force_dir,force_type)) 
-    
-    molList= []
-    for item in force_files : 
-        state, molec,throwAway,field = item.split('/') 
-        if not os.path.isfile("%s/%s/%s/%s.%s.projected.xvg"%(state,molec,force_dir,molec,force_type)) : 
-            print "%s\tNot found, removing!"%molec
-            force_files.remove(item) 
-        else : 
-            molList.append([state, molec]) 
-    
-    molList = sorted(molList ) 
-    numMols = len(molList) /2
-    data = [] 
-    for molec in range(numMols ) : 
-        if not molList[molec][1] == molList[molec+numMols][1] : 
-            print "Logical fallicy! Your A & B states do not align. Cowardly exitting." 
-            exit() 
-        try : 
-            fieldA = np.genfromtxt("%s/%s/%s/%s.%s.projected.xvg"%(molList[molec][0],molList[molec][1],force_dir,molList[molec][1],force_type),comments='#' ) 
-            fieldB = np.genfromtxt("%s/%s/%s/%s.%s.projected.xvg"%(molList[molec+numMols][0],molList[molec+numMols][1],force_dir,molList[molec+numMols][1],force_type),comments='#' ) 
-        except : 
-            print "ERROR: %s failed!"%molList[molec]
-            continue 
-        try : 
-            print mutToExp[molList[molec][1]]
-        except : 
-            print molList[molec][1]
-            continue
-        
-        ##Step size is 4 ps. 2500 frames is 10 ns. Discarded as equilibration time.
-        solventFieldA = np.average(fieldA[2500:]) 
-        solventFieldB = np.average(fieldB[2500:]) 
-        stdA = np.std(fieldA[2500:])
-        stdB = np.std(fieldB[2500:])
-        
-        data.append([molList[molec][1],solventFieldA, solventFieldB, stdA, stdB]) 
-    
-    for molec in data : 
-        try : 
-            pKa = float(mutExppKa[molec[0]][0]) 
-        except (KeyError, ValueError) : 
-            print "%s pKa not found!"%molec[0]
-            data.remove(molec) 
-            print molec[0], " removed!"
-            continue
-        #print molec[0],pKa
-        ## From Henderson-Hasselbalch eqn. 
-        ratio = 10**+(7.4 - pKa) 
-        wA = 1/(1+ratio) 
-        wB = ratio / (ratio +1) 
-        weightedF = molec[2] * wB + molec[1]*wA 
-        weightedSTD = np.sqrt(molec[3]**2/wA + molec[4]**2/wB ) 
-        molec.append(weightedF) 
-        molec.append(weightedSTD)
-    
-    
-    ## Print calculated data to a file
-    force_file="%s/%s.dat"%(save_dir,force_type) 
-    with open(force_file,'w') as f: 
-        f.write("Name      SolventFieldA   SolventFieldB    WeightedField   WeightedSTD\n") 
-    with open(force_file,'a') as f : 
-        for item in data : 
-            f.write("%s\t%f\t%f\t%f\t%f\n"%(item[0],item[1],item[2],item[5],item[6]) ) 
-    
-    ## Read in data from file and plot 
-    names= np.genfromtxt(force_file,skip_header=1,usecols=0,dtype='str') 
-    dataA= np.genfromtxt(force_file,skip_header=1,usecols=1) 
-    dataB= np.genfromtxt(force_file,skip_header=1,usecols=2) 
-    dataW= np.genfromtxt(force_file,skip_header=1,usecols=3) 
-    dataS= np.genfromtxt(force_file,skip_header=1,usecols=4) 
-    
-    fig1, ax1 = plt.subplots(1,1) 
-    for index, name in enumerate(names) : 
-        print name,"\t",mutToExp[name],"\t",dataW[index],"\t",dataA[index],"\t",dataB[index]
-        ax1.errorbar(mutToExp[name],dataW[index],label=name,marker='o')
-        ax1.scatter(mutToExp[name],dataA[index],marker='D',color='darkgray')
-        ax1.scatter(mutToExp[name],dataB[index],marker='^',color='darkgray')
+#fig, axarr = plt.subplots(3,1) 
+#fig.set_size_inches(3.5,6) 
+#fig.subplots_adjust(hspace=0.5,left=0.2,top=0.9,bottom=0.1) 
+#for index, force_type in enumerate(['external_field','solvent_rxn_field','total_field']) : 
+#    ax = axarr[index] 
+#    ax.set_title(force_type ) 
+#
+#    force_files = glob.glob('B_State/*/force_calc/*.%s.projected.xvg'%force_type) 
+#
+#    avgAccum = [] 
+#    expAccum = [] 
+#    for fFile in force_files : 
+#        molec = fFile.split('/')[3].split('.')[0]  
+#        print molec 
+#
+#        try : 
+#            data = np.genfromtxt(fFile) 
+#        except : 
+#            print "%s file failed to import. Skipping."%fFile 
+#            continue 
+#    
+#        avg = np.average(data) 
+#        std = np.std(data) 
+#        exp = float(mutToExp[molec]) 
+#
+#        avgAccum.append(avg) 
+#        expAccum.append(exp) 
+#        print "%20s%12s%10.1f +/- %3.1f\t%.1f"%(force_type, molec, avg, std, exp) 
+#
+#        ax.errorbar(exp, avg, std, ecolor='k',fmt='none') 
+#        ax.scatter(exp,avg,marker='D',edgecolor='k',color=nameToColorKeys[molec],zorder=3) 
+#
+#
+#    slope, intercept, r_value, p_value, std_error = linregress(expAccum, avgAccum) 
+#    print "***%20s: r = %0.5f***"%(force_type, r_value) 
+#    xs = np.linspace(min(expAccum),max(expAccum),100) 
+#    ys = slope * xs + intercept 
+#    ax.plot(xs,ys,label="r = %0.2f"%r_value) 
+#    ax.legend(loc=2,fontsize='xx-small') 
+#    
+#fig.savefig('%s/forces.pdf'%save_dir,format='pdf') 
+#
+#fig, axarr = plt.subplots(2,1) 
+#fig.set_size_inches(3.5,6) 
+#fig.subplots_adjust(hspace=0.5,left=0.2,top=0.9,bottom=0.1) 
+#for index, force_type in enumerate(['external_field','total_field']) : 
+#    ax = axarr[index] 
+#    ax.set_title(force_type+'-solvent_rxn' ) 
+#
+#    force_files = glob.glob('B_State/*/force_calc/*.%s.projected.xvg'%force_type) 
+#
+#    avgAccum = [] 
+#    expAccum = [] 
+#    for fFile in force_files : 
+#        molec = fFile.split('/')[3].split('.')[0]  
+#        print molec 
+#
+#        try : 
+#            data = np.genfromtxt(fFile) 
+#        except : 
+#            print "%s file failed to import. Skipping."%fFile 
+#            continue 
+#        try : 
+#            data2 = np.genfromtxt('B_State/%s/force_calc/%s.solvent_rxn_field.projected.xvg'%(molec,molec)) 
+#        except : 
+#            print "Solvent_rxn_field for %s file failed to import. Skipping."%molec
+#            continue 
+#        
+#        assert len(data) == len(data2) 
+#
+#        data = data - data2
+#
+#        data = data[2500:] ##Discard first 10ns as equilibration time. 2500 frames*4ps/frame = 10 ns 
+#
+#        avg = np.average(data) 
+#        std = np.std(data) 
+#        exp = float(mutToExp[molec]) 
+#
+#        avgAccum.append(avg) 
+#        expAccum.append(exp) 
+#        print "%20s%12s%10.1f +/- %3.1f\t%.1f"%(force_type, molec, avg, std, exp) 
+#
+#        ax.errorbar(exp, avg, std, ecolor='k',fmt='none') 
+#        ax.scatter(exp,avg,marker='D',edgecolor='k',color=nameToColorKeys[molec],zorder=3) 
+#
+#
+#    slope, intercept, r_value, p_value, std_error = linregress(expAccum, avgAccum) 
+#    print "***%20s: r = %0.5f***"%(force_type, r_value) 
+#    xs = np.linspace(min(expAccum),max(expAccum),100) 
+#    ys = slope * xs + intercept 
+#    ax.plot(xs,ys,label="r = %0.2f"%r_value) 
+#    ax.legend(loc=2,fontsize='xx-small') 
+#    
+#fig.savefig('%s/forces-minus-solvent-rxn-field.pdf'%save_dir,format='pdf') 
 
-    #minX, maxX = np.min(dataW), np.max(dataW) 
-    #x = np.arange(minX,maxX,0.01) 
+fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row')
+fig.subplots_adjust(wspace=0)
+fig.text(0.5,0.04, r"R$_g$ ($\AA$)", ha='center', va='center')
+fig.text(0.03,0.5, r"RMSD ($\AA$)", ha='center', va='center',rotation='vertical')
+
+figD, axarrD = plt.subplots(figRows,figCols,sharex='col',sharey='row')
+figD.subplots_adjust(wspace=0)
+figD.text(0.5,0.04, r"R$_g$ ($\AA$)", ha='center', va='center')
+figD.text(0.03,0.5, r"RMSD ($\AA$)", ha='center', va='center',rotation='vertical')
+
+molList = glob.glob('B_State/*/force_calc') 
+for index, mol in enumerate(molList) :
+    molec = mol.split('/')[1]
+    print index, index/figCols, index%figRows
+    ax = axarr[index/figCols,index%figCols]
+    axD = axarrD[index/figCols,index%figCols]
+
+    field='external_field'
+    datafile = 'B_State/'+molec+'/force_calc/'+molec+'.%s.projected.xvg'%field
+    try :
+        data1 = np.genfromtxt(datafile) 
+        data1 = data1[2500:]
+    except IOError :
+        print "No file found for %s"%(datafile)
+        continue 
+
+    avg, firstD = [],[]
+    for i in range(0,len(data1[:]) ) :
+        avg.append(np.average(data1[:i]))
+    for i in range(len(avg) - 1) :
+        firstD.append(avg[i+1] - avg[i])
+    firstD = np.array(firstD)
+
+    ax.plot(avg,color='b')
+    axD.plot(firstD,color='b',linewidth=0.1)
     
-    fig1.savefig("%s/%s.pdf"%(save_dir,force_type),format='pdf') 
-    plt.close() 
+    axD.set_ylim([-.1,.1]) 
 
-
+fig.savefig('%s/forces-time.png'%save_dir,format='png') 
+figD.savefig('%s/forces-timeD.png'%save_dir,format='png') 
