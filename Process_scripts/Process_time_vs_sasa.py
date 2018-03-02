@@ -5,15 +5,19 @@ import os
 from os import sys
 from matplotlib.colors import LogNorm
 import matplotlib.lines as mlines 
+from matplotlib import rc_file
 
 figCols=3
 figRows=3
+
+rcFile = 'rc_files/paper.rc'
+rc_file(rcFile) 
 
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
-fig.subplots_adjust(wspace=0) 
+fig.subplots_adjust(wspace=0.1,hspace=0.35,left=0.1) 
 fig.text(0.5,0.04, r"Time (ns)", ha='center', va='center') 
 fig.text(0.04,0.5, r"SASA (nm$^2$)", ha='center', va='center',rotation='vertical') 
 
@@ -28,14 +32,14 @@ for mol in molList :
     try : 
         data1 = np.genfromtxt(datafile,skip_header=27) 
         data1[:,0] = data1[:,0] / 1000 
-        ax.scatter(data1[:,0],data1[:,2],color='k',s=0.1) 
+        ax.scatter(data1[:,0],data1[:,2],color='b',s=0.1) 
     except IOError : 
         print "No file found for %s"%(datafile)  
     except ValueError :
         print "Trying %s again without bottom line."%datafile
         data1 = np.genfromtxt(datafile,skip_header=27,skip_footer=1) 
         data1[:,0] = data1[:,0] / 1000 
-        ax.scatter(data1[:,0],data1[:,2],color='k',s=0.1,label="Whole residue") 
+        ax.scatter(data1[:,0],data1[:,2],color='b',s=0.1,label="Whole residue") 
 
     #datafile = mol+'/sidechain.xvg'
     #print datafile
@@ -51,18 +55,18 @@ for mol in molList :
     #    data1[:,0] = data1[:,0] / 1000 
     #    ax.scatter(data1[:,0],data1[:,2],color='r',s=0.1) 
 
-    datafile = mol+'/nit_4_atoms_area.xvg'
-    try : 
-        data2 = np.genfromtxt(datafile,skip_header=27) 
-        data2[:,0] = data2[:,0] / 1000 
-        ax.scatter(data2[:,0],data2[:,2],color='g',s=0.1,label="5 atom area") 
-    except IOError : 
-        print "No file found for %s"%(datafile)  
-    except ValueError :
-        print "Trying %s again without bottom line."%datafile
-        data2 = np.genfromtxt(datafile,skip_header=27,skip_footer=1) 
-        data2[:,0] = data2[:,0] / 1000 
-        ax.scatter(data2[:,0],data2[:,2],color='g',s=0.1) 
+    #datafile = mol+'/nit_4_atoms_area.xvg'
+    #try : 
+    #    data2 = np.genfromtxt(datafile,skip_header=27) 
+    #    data2[:,0] = data2[:,0] / 1000 
+    #    ax.scatter(data2[:,0],data2[:,2],color='g',s=0.1,label="5 atom area") 
+    #except IOError : 
+    #    print "No file found for %s"%(datafile)  
+    #except ValueError :
+    #    print "Trying %s again without bottom line."%datafile
+    #    data2 = np.genfromtxt(datafile,skip_header=27,skip_footer=1) 
+    #    data2[:,0] = data2[:,0] / 1000 
+    #    ax.scatter(data2[:,0],data2[:,2],color='g',s=0.1) 
 
     #datafile = mol+'/nh_ct_area.xvg'
     #try : 
@@ -88,12 +92,12 @@ fig.savefig('figures/sasa_v_time.png',format='png')
 plt.close() 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
-fig.subplots_adjust(wspace=0) 
+fig.subplots_adjust(wspace=0.1,hspace=0.35,left=0.1) 
 fig.text(0.5,0.04, r"Time (ns)", ha='center', va='center') 
 fig.text(0.02,0.5, r"$\left < \rm{SASA} \right > (\rm{nm}^2$)", ha='center', va='center',rotation='vertical') 
 
 figD, axarrD = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
-figD.subplots_adjust(wspace=0) 
+figD.subplots_adjust(wspace=0.1,hspace=0.35,left=0.1) 
 figD.text(0.5,0.04, r"Time (ns)", ha='center', va='center') 
 figD.text(0.02,0.5, r"$\frac{d}{dt} \left < \rm{SASA} \right > (\rm{nm}^2 \rm{nm}^{-1}$)", ha='center', va='center',rotation='vertical') 
 
@@ -124,9 +128,9 @@ for mol in molList :
         firstD.append(avg[i+1] - avg[i]) 
     firstD = np.array(firstD) 
 
-    ax.plot(data1[:,0],avg,color='k') 
-    firstD= firstD + 0.0005
-    axD.plot(data1[1:,0],firstD,color='k',linewidth=0.1) 
+    ax.plot(data1[:,0],avg,color='b') 
+    firstD= firstD
+    axD.plot(data1[1:,0],firstD,color='b',linewidth=0.1) 
 
 #    datafile = mol+'/sidechain.xvg'
 #    try : 
@@ -150,29 +154,29 @@ for mol in molList :
 #    ax.plot(data1[:,0],avg,color='r') 
 #    axD.plot(data1[1:,0],firstD,color='r',linewidth=0.1) 
 
-    datafile = mol+'/nit_4_atoms_area.xvg'
-    try : 
-        data1 = np.genfromtxt(datafile,skip_header=27) 
-        data1 = data1[2500:,:] 
-        data1[:,0] = data1[:,0] / 1000 
-    except IOError : 
-        print "No file found for %s"%(datafile)  
-    except ValueError :
-        print "Trying %s again without bottom line."%datafile
-        data1 = np.genfromtxt(datafile,skip_header=27,skip_footer=1) 
-        data1 = data1[2500:,:] 
-        data1[:,0] = data1[:,0] / 1000 
-    
-    avg, firstD = [],[]
-    for i in range(0,len(data1[:,2]) ) : 
-        avg.append(np.average(data1[:i,2])) 
-    for i in range(len(avg) - 1) : 
-        firstD.append(avg[i+1] - avg[i]) 
-    firstD = np.array(firstD) 
-
-    ax.plot(data1[:,0],avg,color='g') 
-    firstD= firstD - 0.0005
-    axD.plot(data1[1:,0],firstD,color='g',linewidth=0.1) 
+#    datafile = mol+'/nit_4_atoms_area.xvg'
+#    try : 
+#        data1 = np.genfromtxt(datafile,skip_header=27) 
+#        data1 = data1[2500:,:] 
+#        data1[:,0] = data1[:,0] / 1000 
+#    except IOError : 
+#        print "No file found for %s"%(datafile)  
+#    except ValueError :
+#        print "Trying %s again without bottom line."%datafile
+#        data1 = np.genfromtxt(datafile,skip_header=27,skip_footer=1) 
+#        data1 = data1[2500:,:] 
+#        data1[:,0] = data1[:,0] / 1000 
+#    
+#    avg, firstD = [],[]
+#    for i in range(0,len(data1[:,2]) ) : 
+#        avg.append(np.average(data1[:i,2])) 
+#    for i in range(len(avg) - 1) : 
+#        firstD.append(avg[i+1] - avg[i]) 
+#    firstD = np.array(firstD) 
+#
+#    ax.plot(data1[:,0],avg,color='g') 
+#    firstD= firstD - 0.0005
+#    axD.plot(data1[1:,0],firstD,color='g',linewidth=0.1) 
 
 #    datafile = mol+'/nh_ct_area.xvg'
 #    try : 
