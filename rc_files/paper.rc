@@ -5,4 +5,5 @@ legend.fontsize : 9.0
 font.family     : serif  
 font.serif      : Computer Modern Roman  
 text.usetex     : True  # use latex for all text handling  
-figure.figsize  : 7.3, 4.2 
+figure.figsize  : 4.0, 4.0 
+figure.dpi      : 200  

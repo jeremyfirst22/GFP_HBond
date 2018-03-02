@@ -5,20 +5,24 @@ import os
 from os import sys
 from scipy.stats import linregress
 from matplotlib import rc_file
+import matplotlib as mpl 
 
 equilTime=10   #ns 
 equilTime=equilTime*1000 / 4 ##frames
 
 inFile='Exp_data/sasa_abs_data.dat'  
-#rcFile='paper.rc'
+rcFile='rc_files/paper.rc'
 
 saveDir='figures/sasa_vs_slopes' 
 
 if not os.path.isdir(saveDir) : 
     os.mkdir(saveDir)
 
-#rc_file("rc_files/%s"%rcFile) 
+rc_file(rcFile) 
+mpl.rcParams['figure.figsize'] = 5,4
+
 fig, ax = plt.subplots(1,1) 
+fig.subplots_adjust(left=0.15,right=0.85) 
 
 names = np.genfromtxt(inFile,skip_header=1,usecols=0,dtype='str')
 slopes= np.genfromtxt(inFile,skip_header=1,usecols=1) 
@@ -72,7 +76,7 @@ plt.plot(x,x*slope+intercept,label="r = %0.3f"%r_value)
 box = ax.get_position() 
 ax.set_position([box.x0, box.y0, box.width *0.85, box.height]) 
 
-plt.legend(bbox_to_anchor=(1.25, 0.95),numpoints=1,fontsize='x-small',edgecolor='k')
+plt.legend(bbox_to_anchor=(1.40, 0.95),numpoints=1,edgecolor='k')
 plt.xlabel(r"SASA (nm$^2$)") 
 plt.ylabel(r"FTLS (cm$^{-1}$ / K)") 
 
