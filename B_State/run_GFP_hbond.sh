@@ -364,6 +364,116 @@ hbond(){
         fi  
 } 
 
+hbond_with_ca(){
+    printf "\t\tAnalyzing hydrogen bonds.................." 
+    if [ ! -f hbond_with_ca/geometry.xvg ] ; then 
+        create_dir hbond_with_ca
+        cp Production/solvent_npt.gro hbond_with_ca/. 
+        cp Production/neutral.top hbond_with_ca/. 
+        cp Production/*.itp hbond_with_ca/. 
+        cd hbond_with_ca
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -op persistent.xvg \
+            -or geometry.xvg \
+            -oa hb_count.xvg \
+            -onwr nw_geometry.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg geometry.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+fit_hbond_with_ca(){
+    printf "\t\tFitting hbond analysia...................." 
+    if [ ! -f hbond_with_ca/geometry.xvg ] ; then 
+        printf "Skipping\n"  
+        break 
+        fi 
+
+    if [ ! -f ~/normal_distribution/tiltAngle ] ; then 
+        printf "Skipping\n" 
+        break 
+        fi     
+
+    if [ ! -f fit_hbond_with_ca/nw_theta2.poly ] ; then 
+        create_dir fit_hbond_with_ca
+        cp hbond_with_ca/*geometry.xvg fit_hbond_with_ca/. 
+        cd fit_hbond_with_ca
+        clean 
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > clean_dist.dat 
+        check clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_dist.dat -o dist.his -g dist.gaus -p dist.poly 
+        check dist.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > clean_theta1.dat 
+        check clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta1.dat -o theta1.his -g theta1.gaus -p theta1.poly -n 81 
+        check theta1.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > clean_theta2.dat 
+        check clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta2.dat -o theta2.his -g theta2.gaus -p theta2.poly 
+        check theta2.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > nw_clean_dist.dat 
+        check nw_clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_dist.dat -o nw_dist.his -g nw_dist.gaus -p nw_dist.poly 
+        check nw_dist.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > nw_clean_theta1.dat 
+        check nw_clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta1.dat -o nw_theta1.his -g nw_theta1.gaus -p nw_theta1.poly 
+        check nw_theta1.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > nw_clean_theta2.dat 
+        check nw_clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta2.dat -o nw_theta2.his -g nw_theta2.gaus -p nw_theta2.poly 
+        check nw_theta2.poly
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 hbond_1(){
     printf "\t\tAnalyzing hydrogen bonds with forgive 1..." 
     if [ ! -f hbond_1/persistent.xvg ] ; then 
@@ -1055,12 +1165,13 @@ solvent_npt
 production 
 if grep -sq CNF $MOLEC.pdb ; then 
     hbond 
+    hbond_with_ca
     hbond_1
     hbond_2
     hbond_3
     hbond_4
     hbond_5
-    fit_hbond
+    fit_hbond_with_ca
     sasa
     mindist 
     sorient
