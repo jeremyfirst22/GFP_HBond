@@ -11,7 +11,7 @@ figRows=3
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
 
-datafiles = glob.glob('B_State/*/hbond/hb_count.xvg') 
+datafiles = glob.glob('B_State/*/hbond_with_ca/hb_count.xvg') 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0,hspace=0.3) 
