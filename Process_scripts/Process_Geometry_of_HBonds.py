@@ -21,6 +21,17 @@ nameToColorKeys = {
         "Y92X":'m'
         }
 
+molecList = [
+        "Y92X",
+        "F114X", 
+        "D117X", 
+        "Y143X", 
+        "F145X", 
+        "F165X", 
+        "N198X",
+        "N212X", 
+        "M218X"]
+
 figCols=3
 figRows=3
 
@@ -39,7 +50,8 @@ fig.text(0.05,0.5, r"$\theta_1$ (deg)", ha='center', va='center',rotation='verti
 xmin,xmax = 1.45, 2.45
 ymin,ymax = 99,180 
 
-for index,file in enumerate(datafiles) : 
+for index,molec in enumerate(molecList) : 
+    file="B_State/GFP_%s/hbond_with_ca/geometry.xvg"%molec
     data = np.genfromtxt(file,skip_header=23) 
     try :
         data[:,0] = data[:,0] / 1000 * 4
@@ -71,7 +83,7 @@ for index,file in enumerate(datafiles) :
        linewidths=1,colors='black',
            linestyles='solid',levels=np.arange(-1,1500,125))
 
-    ax.set_title(file.split('/')[1].split('_')[1]) 
+    ax.set_title(molec) 
     ax.set_ylim([ymin,ymax])
     ax.set_xlim([xmin,xmax]) 
 
@@ -143,7 +155,8 @@ fig.text(0.05,0.5, r"$\theta_1$ (deg)", ha='center', va='center',rotation='verti
 xmin,xmax = 1.45, 2.45
 ymin,ymax = 99,180 
 
-for index,file in enumerate(datafiles) : 
+for index,molec in enumerate(molecList) : 
+    file="B_State/GFP_%s/hbond_with_ca/nw_geometry.xvg"%molec
     data = np.genfromtxt(file,skip_header=23) 
     try :
         data[:,0] = data[:,0] / 1000 * 4
@@ -174,14 +187,9 @@ for index,file in enumerate(datafiles) :
        linewidths=1,colors='black',
            linestyles='solid',levels=np.arange(-1,1500,125))
 
-    ax.set_title(file.split('/')[1].split('_')[1]) 
+    ax.set_title(molec) 
     ax.set_ylim([ymin,ymax])
     ax.set_xlim([xmin,xmax]) 
-
-
-if len(datafiles)%figCols != 0 : 
-    for i in np.arange(figCols, len(datafiles)%figCols, -1) : 
-        fig.delaxes(axarr[figRows-1,i-1]) 
 
 fig.savefig('figures/Geometries_protein_heat.png',format='png') 
 plt.close() 
@@ -355,10 +363,6 @@ plt.close()
 ###Plot histogrammed data
 #
 datafiles = glob.glob('B_State/*/fit_hbond_with_ca/dist.poly') 
-molecList = [] 
-for file in datafiles : 
-    molecList.append(file.split('/')[1]) 
-print molecList 
 
 ##Dist analysis
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
@@ -388,12 +392,12 @@ with open('Exp_data/sasa_abs_data.dat') as f :
 accumAvgTheta = [] 
 accumAbsMax = [] 
 for index, molec in enumerate(molecList) : 
-    fileWhis = 'B_State/%s/fit_hbond_with_ca/dist.his'%(molec) 
-    fileWpoly = 'B_State/%s/fit_hbond_with_ca/dist.poly'%(molec) 
-    fileWgeom = 'B_State/%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
-    filePhis = 'B_State/%s/fit_hbond_with_ca/nw_dist.his'%(molec) 
-    filePpoly = 'B_State/%s/fit_hbond_with_ca/nw_dist.poly'%(molec) 
-    filePgeom = 'B_State/%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
+    fileWhis = 'B_State/GFP_%s/fit_hbond_with_ca/dist.his'%(molec) 
+    fileWpoly = 'B_State/GFP_%s/fit_hbond_with_ca/dist.poly'%(molec) 
+    fileWgeom = 'B_State/GFP_%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
+    filePhis = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.his'%(molec) 
+    filePpoly = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.poly'%(molec) 
+    filePgeom = 'B_State/GFP_%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
     
     headlines = 0 
     with open(fileWgeom) as f :
@@ -453,12 +457,6 @@ for index, molec in enumerate(molecList) :
     print volumesP
     probsP = probsP / volumesP
 
-    #volumes = 4 / 3 * np.pi *((distsW+0.01)**3 - distsW **3) 
-    #probsW = probsW / volumes 
-
-    #volumes = 4 / 3 * np.pi *((distsP+0.01)**3 - distsP **3) 
-    #probsP = probsP / volumes 
-
     avgDistW = 0
     avgDistP = 0
     for i in range(len(distsW)) : 
@@ -475,18 +473,16 @@ for index, molec in enumerate(molecList) :
     ax = axarr[index/figCols,index%figCols]
     axD = axarrDens[index/figCols,index%figCols]
 
-    name = molec.split('_')[1]
-    #if not name == "Y143X" and not name=="Y92X" and not name=="F145X" : 
-    if not name == "NVMY143X" : 
+    if True :
         try : 
-            ax2.scatter(avgDistTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100)  
-            accumAbsMax.append(absMax["GFP_"+name]) 
+            ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100)  
+            accumAbsMax.append(absMax["GFP_"+molec]) 
             accumAvgTheta.append(avgDistTot) 
 
         except KeyError : 
             print "No key found for %s"%file.split('/')[1]
     else : 
-        ax2.scatter(avgDistTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100,alpha=0.25)  
+        ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100,alpha=0.25)  
 
     ax2.axhline(2227.5,color='k',linestyle='--') 
     ax2.axhline(2235.9,color='b',linestyle='--') 
@@ -504,11 +500,11 @@ for index, molec in enumerate(molecList) :
     axD.axvline(avgDistP, color='g', linestyle='--') 
     axD.axvline(avgDistTot, color='k', linestyle='--') 
 
-    ax.set_title(name) 
+    ax.set_title(molec) 
     ax.set_ylim(0,30000)
     ax.set_xlim(1.45,2.45) 
 
-    axD.set_title(name) 
+    axD.set_title(molec) 
     axD.set_ylim(0,80000) 
     axD.set_xlim(1.45,2.45) 
 
@@ -554,12 +550,12 @@ with open('Exp_data/sasa_abs_data.dat') as f :
 accumAvgTheta = [] 
 accumAbsMax = [] 
 for index, molec in enumerate(molecList) : 
-    fileWhis = 'B_State/%s/fit_hbond_with_ca/theta1.his'%(molec) 
-    fileWpoly = 'B_State/%s/fit_hbond_with_ca/theta1.poly'%(molec) 
-    fileWgeom = 'B_State/%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
-    filePhis = 'B_State/%s/fit_hbond_with_ca/nw_theta1.his'%(molec) 
-    filePpoly = 'B_State/%s/fit_hbond_with_ca/nw_theta1.poly'%(molec) 
-    filePgeom = 'B_State/%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
+    fileWhis = 'B_State/GFP_%s/fit_hbond_with_ca/theta1.his'%(molec) 
+    fileWpoly = 'B_State/GFP_%s/fit_hbond_with_ca/theta1.poly'%(molec) 
+    fileWgeom = 'B_State/GFP_%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
+    filePhis = 'B_State/GFP_%s/fit_hbond_with_ca/nw_theta1.his'%(molec) 
+    filePpoly = 'B_State/GFP_%s/fit_hbond_with_ca/nw_theta1.poly'%(molec) 
+    filePgeom = 'B_State/GFP_%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
     
     headlines = 0 
     with open(fileWgeom) as f :
@@ -641,18 +637,17 @@ for index, molec in enumerate(molecList) :
     ax = axarr[index/figCols,index%figCols]
     axD = axarrDens[index/figCols,index%figCols]
 
-    name = molec.split('_')[1]
-    #if not name == "Y92X" and not name == "F145X" : 
+    #if not molec == "Y92X" and not molec == "F145X" : 
     if True : 
         try : 
-            ax2.scatter(avgAngleTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100)  
-            accumAbsMax.append(absMax["GFP_"+name]) 
+            ax2.scatter(avgAngleTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100)  
+            accumAbsMax.append(absMax["GFP_"+molec]) 
             accumAvgTheta.append(avgAngleTot) 
 
         except KeyError : 
             print "No key found for %s"%file.split('/')[1]
     else : 
-        ax2.scatter(avgAngleTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100,alpha=0.25)  
+        ax2.scatter(avgAngleTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100,alpha=0.25)  
 
     ax2.axhline(2227.5,color='k',linestyle='--') 
     ax2.axhline(2235.9,color='b',linestyle='--') 
@@ -670,11 +665,11 @@ for index, molec in enumerate(molecList) :
     axD.axvline(avgAngleP, color='g', linestyle='--') 
     axD.axvline(avgAngleTot, color='k', linestyle='--') 
 
-    ax.set_title(name) 
+    ax.set_title(molec) 
     ax.set_ylim(0,450  ) 
     ax.set_xlim(100,180) 
 
-    axD.set_title(name) 
+    axD.set_title(molec) 
     axD.set_ylim(0,7000 ) 
     axD.set_xlim(100,180) 
 
@@ -691,7 +686,6 @@ figDens.savefig('figures/Geometries_angles_density.png',format='png')
 f2.savefig('figures/abs_max_vs_max_theta.pdf',format='pdf') 
 plt.close() 
 
-#molecList.remove('GFP_Y143X') 
 for field in ['total_field','rxn_field','coloumb_field'] :
     fig, axarr = plt.subplots(3,3) 
     fig.set_size_inches(18.5, 10.5)
@@ -708,20 +702,15 @@ for field in ['total_field','rxn_field','coloumb_field'] :
         ax = axarr[i/figCols,i%figCols] 
         gamma = i /12.0
         for index, molec in enumerate(molecList) : 
-            name = molec.split('_')[1]
             x = accumAvgTheta[index] 
             y = accumAbsMax[index] 
-            stark = float(starkShifts[molec] ) * gamma
+            stark = float(starkShifts["GFP_"+molec] ) * gamma
             y -= stark
-            ax.scatter(x,y,marker='D',label=name,color=nameToColorKeys[name]) 
+            ax.scatter(x,y,marker='D',label=molec,color=nameToColorKeys[molec]) 
             ax.set_title(r"$\gamma$ = %2.2f"%gamma) 
     fig.savefig('force_calc_APBS/angle+%s.png'%field,format='png')         
 
 datafiles = glob.glob('B_State/*/fit_hbond_with_ca/dist.poly') 
-molecList = [] 
-for file in datafiles : 
-    molecList.append(file.split('/')[1]) 
-print molecList 
 
 ##Theta 2 analyis
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
@@ -751,12 +740,12 @@ with open('Exp_data/sasa_abs_data.dat') as f :
 accumAvgTheta = [] 
 accumAbsMax = [] 
 for index, molec in enumerate(molecList) : 
-    fileWhis = 'B_State/%s/fit_hbond_with_ca/theta2.his'%(molec) 
-    fileWpoly = 'B_State/%s/fit_hbond_with_ca/theta2.poly'%(molec) 
-    fileWgeom = 'B_State/%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
-    filePhis = 'B_State/%s/fit_hbond_with_ca/nw_theta2.his'%(molec) 
-    filePpoly = 'B_State/%s/fit_hbond_with_ca/nw_theta2.poly'%(molec) 
-    filePgeom = 'B_State/%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
+    fileWhis = 'B_State/GFP_%s/fit_hbond_with_ca/theta2.his'%(molec) 
+    fileWpoly = 'B_State/GFP_%s/fit_hbond_with_ca/theta2.poly'%(molec) 
+    fileWgeom = 'B_State/GFP_%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
+    filePhis = 'B_State/GFP_%s/fit_hbond_with_ca/nw_theta2.his'%(molec) 
+    filePpoly = 'B_State/GFP_%s/fit_hbond_with_ca/nw_theta2.poly'%(molec) 
+    filePgeom = 'B_State/GFP_%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
     
     headlines = 0 
     with open(fileWgeom) as f :
@@ -821,17 +810,16 @@ for index, molec in enumerate(molecList) :
     ax = axarr[index/figCols,index%figCols]
     axD = axarrDens[index/figCols,index%figCols]
 
-    name = molec.split('_')[1]
-    if not name == "Y143X" and not name == "Y92X" : 
+    if not molec == "Y143X" and not molec == "Y92X" : 
         try : 
-            ax2.scatter(avgAngleTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100)  
-            accumAbsMax.append(absMax["GFP_"+name]) 
+            ax2.scatter(avgAngleTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100)  
+            accumAbsMax.append(absMax["GFP_"+molec]) 
             accumAvgTheta.append(avgAngleTot) 
 
         except KeyError : 
             print "No key found for %s"%file.split('/')[1]
     else : 
-        ax2.scatter(avgAngleTot, absMax["GFP_"+name],marker='P',label=name,color=nameToColorKeys[name],edgecolor='k',s=100,alpha=0.25)  
+        ax2.scatter(avgAngleTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100,alpha=0.25)  
 
     ax2.axhline(2227.5,color='k',linestyle='--') 
     ax2.axhline(2235.9,color='b',linestyle='--') 
@@ -849,11 +837,11 @@ for index, molec in enumerate(molecList) :
     axD.axvline(avgAngleP, color='g', linestyle='--') 
     axD.axvline(avgAngleTot, color='k', linestyle='--') 
 
-    ax.set_title(name) 
+    ax.set_title(molec) 
     ax.set_ylim(0,450  ) 
     ax.set_xlim(100,180) 
 
-    axD.set_title(name) 
+    axD.set_title(molec) 
     axD.set_ylim(0,4900 ) 
     axD.set_xlim(100,180) 
 
