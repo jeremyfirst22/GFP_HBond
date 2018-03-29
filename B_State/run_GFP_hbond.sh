@@ -1,13 +1,27 @@
 #!/bin/bash
 
 usage(){
-    echo "USAGE: $0 <PDB file {molec.pdb} > "
+    echo "USAGE: $0 <PDB file {molec.pdb} > [ temperature: 310K, 290K. Default = 300K]"
     exit 
 }
 
 if [ -z $1 ] ; then 
     usage 
     fi 
+
+if [ ! -z $2 ] ; then 
+    if [ $2 == 310 ] ; then 
+        temp=true
+        temperature=310
+    elif [ $2 == 290 ] ; then 
+        temp=true
+        temperature=290
+    else 
+        echo "ERROR: $2 not a implemented temperature yet." ; exit 
+    fi 
+else 
+    temp=false
+fi 
 
 fileName=$1 
 if [ ! -f $fileName ] ; then 
@@ -94,7 +108,8 @@ protein_steep(){
             -o protein_steep.tpr >> $logFile 2>> $errFile 
         check protein_steep.tpr 
 
-        gmx mdrun -deffnm protein_steep >> $logFile 2>> $errFile 
+        gmx mdrun -deffnm protein_steep \
+            -nt 128 >> $logFile 2>> $errFile 
         check protein_steep.gro 
 
         clean
@@ -168,7 +183,8 @@ solvent_steep(){
             -o solvent_steep.tpr >> $logFile 2>> $errFile 
         check solvent_steep.tpr 
 
-        gmx mdrun -deffnm solvent_steep >> $logFile 2>> $errFile 
+        gmx mdrun -deffnm solvent_steep \
+            -nt 128 >> $logFile 2>> $errFile 
         check solvent_steep.gro 
 
         clean
@@ -195,7 +211,36 @@ solvent_nvt(){
             -o solvent_nvt.tpr >> $logFile 2>> $errFile 
         check solvent_nvt.tpr 
 
-        gmx mdrun -deffnm solvent_nvt >> $logFile 2>> $errFile 
+        gmx mdrun -deffnm solvent_nvt \
+            -nt 128 >> $logFile 2>> $errFile 
+        check solvent_nvt.gro 
+
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+}
+
+solvent_nvt_temp(){
+    printf "\t\tSolvent NVT relaxation at %3i K..........." $temperature
+    if [ ! -f Solvent_nvt_$temperature/solvent_nvt.gro ] ; then 
+        create_dir Solvent_nvt_$temperature
+        
+        cp Solvent_steep/solvent_steep.gro Solvent_nvt_$temperature/. 
+        cp Solvent_steep/neutral.top Solvent_nvt_$temperature/. 
+        cp Solvent_steep/*.itp Solvent_nvt_$temperature/. 
+        cd Solvent_nvt_$temperature
+
+        gmx grompp -f $MDP/solvent_nvt_relax_$temperature.mdp \
+            -c solvent_steep.gro \
+            -p neutral.top \
+            -o solvent_nvt.tpr >> $logFile 2>> $errFile 
+        check solvent_nvt.tpr 
+
+        gmx mdrun -deffnm solvent_nvt \
+            -nt 128 >> $logFile 2>> $errFile 
         check solvent_nvt.gro 
 
         clean
@@ -222,7 +267,36 @@ solvent_npt(){
             -o solvent_npt.tpr >> $logFile 2>> $errFile 
         check solvent_npt.tpr 
 
-        gmx mdrun -deffnm solvent_npt >> $logFile 2>> $errFile 
+        gmx mdrun -deffnm solvent_npt \
+            -nt 128 >> $logFile 2>> $errFile 
+        check solvent_npt.gro 
+
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+}
+
+solvent_npt_temp(){
+    printf "\t\tSolvent NPT relaxation at %3i K..........." $temperature 
+    if [ ! -f Solvent_npt_$temperature/solvent_npt.gro ] ; then 
+        create_dir Solvent_npt_$temperature
+        
+        cp Solvent_nvt_$temperature/solvent_nvt.gro Solvent_npt_$temperature/. 
+        cp Solvent_nvt_$temperature/neutral.top Solvent_npt_$temperature/. 
+        cp Solvent_nvt_$temperature/*.itp Solvent_npt_$temperature/. 
+        cd Solvent_npt_$temperature
+
+        gmx grompp -f $MDP/solvent_npt_relax_$temperature.mdp \
+            -c solvent_nvt.gro \
+            -p neutral.top \
+            -o solvent_npt.tpr >> $logFile 2>> $errFile 
+        check solvent_npt.tpr 
+
+        gmx mdrun -deffnm solvent_npt \
+            -nt 128 >> $logFile 2>> $errFile 
         check solvent_npt.gro 
 
         clean
@@ -253,9 +327,70 @@ production(){
                 check $MOLEC.tpr 
 
             if [ -f $MOLEC.cpt ] ; then 
-                gmx mdrun -deffnm $MOLEC -cpi $MOLEC.cpt >> $logFile 2>> $errFile  
+                gmx mdrun -deffnm $MOLEC \
+                    -cpi $MOLEC.cpt \
+                    -nt 128 >> $logFile 2>> $errFile  
             else 
-                gmx mdrun -deffnm $MOLEC >> $logFile 2>> $errFile 
+                gmx mdrun -deffnm $MOLEC \
+                    -nt 128 >> $logFile 2>> $errFile 
+                fi 
+            fi 
+        check $MOLEC.gro 
+
+        if [ ! -f $MOLEC.nopbc.xtc ] ; then 
+            echo 'Protein System' | gmx trjconv -f $MOLEC.xtc \
+                -center \
+                -s $MOLEC.tpr \
+                -ur compact \
+                -pbc mol \
+                -o $MOLEC.nopbc.xtc >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.nopbc.xtc 
+
+        if [ ! -f $MOLEC.nopbc.gro ] ; then 
+            echo 'Protein System' | gmx trjconv -f $MOLEC.gro \
+                -center \
+                -s $MOLEC.tpr \
+                -ur compact \
+                -pbc mol \
+                -o $MOLEC.nopbc.gro >> $logFile 2>> $errFile 
+            fi 
+        check $MOLEC.nopbc.gro 
+
+        clean
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+production_temp(){
+    printf "\t\tProduction run at %3i K..................." $temperature
+    if [ ! -f Production_$temperature/$MOLEC.nopbc.gro ] ; then 
+        create_dir Production_$temperature
+        
+        cp Solvent_npt_$temperature/neutral.top Production_$temperature/.
+        cp Solvent_npt_$temperature/solvent_npt.gro Production_$temperature/.
+        cp Solvent_npt_$temperature/*.itp Production_$temperature/. 
+        cd Production_$temperature
+
+        if [ ! -f $MOLEC.gro ] ; then 
+            if [ ! -f $MOLEC.tpr ] ; then 
+                gmx grompp -f $MDP/production_$temperature.mdp \
+                    -p neutral.top \
+                    -c solvent_npt.gro \
+                    -o $MOLEC.tpr >> $logFile 2>> $errFile 
+                fi 
+                check $MOLEC.tpr 
+
+            if [ -f $MOLEC.cpt ] ; then 
+                gmx mdrun -deffnm $MOLEC \
+                    -cpi $MOLEC.cpt \
+                    -nt 128 >> $logFile 2>> $errFile  
+            else 
+                gmx mdrun -deffnm $MOLEC \
+                    -nt 128 >> $logFile 2>> $errFile 
                 fi 
             fi 
         check $MOLEC.gro 
@@ -1160,28 +1295,34 @@ cd $MOLEC
 protein_steep
 solvate
 solvent_steep
-solvent_nvt
-solvent_npt
-production 
-if grep -sq CNF $MOLEC.pdb ; then 
-    hbond 
-    hbond_with_ca
-    hbond_1
-    hbond_2
-    hbond_3
-    hbond_4
-    hbond_5
-    fit_hbond_with_ca
-    sasa
-    mindist 
-    sorient
-    rdf
-    force_calc
-    fi 
-minimage
-rmsd 
-chi
-rgyr
+if ! $temp ; then 
+    solvent_nvt
+    solvent_npt
+    production 
+else 
+    solvent_nvt_temp
+    solvent_npt_temp
+    production_temp
+fi 
+#if grep -sq CNF $MOLEC.pdb ; then 
+#    hbond 
+#    hbond_with_ca
+#    hbond_1
+#    hbond_2
+#    hbond_3
+#    hbond_4
+#    hbond_5
+#    fit_hbond_with_ca
+#    sasa
+#    mindist 
+#    sorient
+#    rdf
+#    force_calc
+#    fi 
+#minimage
+#rmsd 
+#chi
+#rgyr
 cd ../
 
 printf "\n\n\t\t*** Program Ending    ***\n\n" 

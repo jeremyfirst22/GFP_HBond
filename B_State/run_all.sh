@@ -25,15 +25,17 @@ for molec in $molecList ; do
     echo "#SBATCH --mail-type=all" >> submit_$molec
     
     echo >> submit_$molec
-    echo "module load boost " >> submit_$molec
-    echo "module load cxx11 " >> submit_$molec
-    echo "module load gromacs " >> submit_$molec 
+    #echo "module load boost " >> submit_$molec
+    #echo "module load cxx11 " >> submit_$molec
+    echo "module load gromacs/5.1.2 " >> submit_$molec 
    
     echo >> submit_$molec
-    echo "bash run_GFP_hbond.sh StartingStructures/${molec}.pdb" >> submit_$molec
+    #echo "bash run_GFP_hbond.sh StartingStructures/${molec}.pdb" >> submit_$molec
+    echo "bash run_GFP_hbond.sh StartingStructures/${molec}.pdb 290" >> submit_$molec
+    echo "bash run_GFP_hbond.sh StartingStructures/${molec}.pdb 310" >> submit_$molec
    
-    #sbatch submit_$molec
-    bash run_GFP_hbond.sh StartingStructures/$molec.pdb 
+    sbatch submit_$molec
+    #bash run_GFP_hbond.sh StartingStructures/$molec.pdb 
 
 
     done 
