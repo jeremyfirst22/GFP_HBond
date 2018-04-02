@@ -542,6 +542,49 @@ hbond_with_ca(){
         fi  
 } 
 
+hbond_with_ca_temp(){
+    printf "\t\tAnalyzing hydrogen bonds.................." 
+    if [ ! -f hbond_with_ca_$temperature/geometry.xvg ] ; then 
+        create_dir hbond_with_ca_$temperature
+        cp Production_$temperature/solvent_npt.gro hbond_with_ca_$temperature/. 
+        cp Production_$temperature/neutral.top hbond_with_ca_$temperature/. 
+        cp Production_$temperature/*.itp hbond_with_ca_$temperature/. 
+        cd hbond_with_ca_$temperature
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production_$temperature/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -op persistent.xvg \
+            -or geometry.xvg \
+            -oa hb_count.xvg \
+            -onwr nw_geometry.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg geometry.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 fit_hbond_with_ca(){
     printf "\t\tFitting hbond analysia...................." 
     if [ ! -f hbond_with_ca/geometry.xvg ] ; then 
@@ -671,6 +714,47 @@ hbond_2(){
         NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
         source /usr/local/gromacs/bin/GMXRC
         g_nitrile_hbond -f ../Production/$MOLEC.xtc \
+            -s v4.tpr \
+            -b 10000 \
+            -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
+            -a1 $CT \
+            -a2 $NH \
+            -forgiveness 2 \
+            -op persistent.xvg \
+            -o frame_hb.xvg >> $logFile 2>> $errFile 
+        check frame_hb.xvg persistent.xvg 
+
+        clean
+        rm solvent_npt.gro neutral.top *.itp 
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+hbond_2_temp(){
+    printf "\t\tAnalyzing hydrogen bonds with forgive 2..." 
+    if [ ! -f hbond_2_$temperature/persistent.xvg ] ; then 
+        create_dir hbond_2_$temperature
+        cp Production_$temperature/solvent_npt.gro hbond_2_$temperature/. 
+        cp Production_$temperature/neutral.top hbond_2_$temperature/. 
+        cp Production_$temperature/*.itp hbond_2_$temperature/. 
+        cd hbond_2_$temperature
+        
+        ##Version 4 tpr required for custom built nitrile code
+        grompp -f $MDP/vac_md.mdp \
+            -c solvent_npt.gro \
+            -p neutral.top \
+            -maxwarn 3 \
+            -o v4.tpr >> $logFile 2>> $errFile 
+        check v4.tpr 
+
+        CT=`grep CNF solvent_npt.gro | grep CT | awk '{print $3}'`
+        NH=`grep CNF solvent_npt.gro | grep NH | awk '{print $3}'`
+        source /usr/local/gromacs/bin/GMXRC
+        g_nitrile_hbond -f ../Production_$temperature/$MOLEC.xtc \
             -s v4.tpr \
             -b 10000 \
             -select 'not resname CNF and (same residue as within 0.5 of resname CNF and name NH)' \
@@ -1299,26 +1383,30 @@ if ! $temp ; then
     solvent_nvt
     solvent_npt
     production 
+    #if grep -sq CNF $MOLEC.pdb ; then 
+    #    hbond 
+    #    hbond_with_ca
+    #    hbond_1
+    #    hbond_2
+    #    hbond_3
+    #    hbond_4
+    #    hbond_5
+    #    fit_hbond_with_ca
+    #    sasa
+    #    mindist 
+    #    sorient
+    #    rdf
+    #    force_calc
+    #    fi 
 else 
     solvent_nvt_temp
     solvent_npt_temp
     production_temp
+    if grep -sq CNF $MOLEC.pdb ; then 
+        hbond_with_ca_temp
+        hbond_2_temp
+        fi 
 fi 
-#if grep -sq CNF $MOLEC.pdb ; then 
-#    hbond 
-#    hbond_with_ca
-#    hbond_1
-#    hbond_2
-#    hbond_3
-#    hbond_4
-#    hbond_5
-#    fit_hbond_with_ca
-#    sasa
-#    mindist 
-#    sorient
-#    rdf
-#    force_calc
-#    fi 
 #minimage
 #rmsd 
 #chi
