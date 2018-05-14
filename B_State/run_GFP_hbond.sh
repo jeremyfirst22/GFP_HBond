@@ -597,10 +597,77 @@ fit_hbond_with_ca(){
         break 
         fi     
 
-    if [ ! -f fit_hbond_with_ca/nw_theta2.poly ] ; then 
+    if [ ! -f fit_hbond_with_ca/theta1.poly ] ; then 
         create_dir fit_hbond_with_ca
         cp hbond_with_ca/*geometry.xvg fit_hbond_with_ca/. 
         cd fit_hbond_with_ca
+        clean 
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > clean_dist.dat 
+        check clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_dist.dat -o dist.his -g dist.gaus -p dist.poly 
+        check dist.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > clean_theta1.dat 
+        check clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta1.dat -o theta1.his -g theta1.gaus -p theta1.poly -n 81 
+        check theta1.poly
+
+        check geometry.xvg 
+        cat geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > clean_theta2.dat 
+        check clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f clean_theta2.dat -o theta2.his -g theta2.gaus -p theta2.poly 
+        check theta2.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $3}' > nw_clean_dist.dat 
+        check nw_clean_dist.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_dist.dat -o nw_dist.his -g nw_dist.gaus -p nw_dist.poly 
+        check nw_dist.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $4}' > nw_clean_theta1.dat 
+        check nw_clean_theta1.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta1.dat -o nw_theta1.his -g nw_theta1.gaus -p nw_theta1.poly 
+        check nw_theta1.poly
+
+        check nw_geometry.xvg 
+        cat nw_geometry.xvg | grep -v "^[#@]" | awk '{print $5}' > nw_clean_theta2.dat 
+        check nw_clean_theta2.dat 
+       
+        /Users/jfirst/normal_distribution/tiltAngle -f nw_clean_theta2.dat -o nw_theta2.his -g nw_theta2.gaus -p nw_theta2.poly 
+        check nw_theta2.poly
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+fit_hbond_with_ca_temp(){
+    printf "\t\tFitting hbond analysia...................." 
+    if [ ! -f hbond_with_ca_$temperature/geometry.xvg ] ; then 
+        printf "Skipping\n"  
+        break 
+        fi 
+
+    if [ ! -f ~/normal_distribution/tiltAngle ] ; then 
+        printf "Skipping\n" 
+        break 
+        fi     
+
+    if [ ! -f fit_hbond_with_ca_$temperature/theta1.poly ] ; then 
+        create_dir fit_hbond_with_ca_$temperature
+        cp hbond_with_ca_$temperature/*geometry.xvg fit_hbond_with_ca_$temperature/. 
+        cd fit_hbond_with_ca_$temperature
         clean 
 
         check geometry.xvg 
@@ -1320,6 +1387,40 @@ rmsd(){
         fi  
 }
 
+rmsd_temp(){
+    printf "\t\tCalculating RMSD.........................." 
+    if [ ! -f rmsd_$temperature/without_ter.xvg ] ; then 
+        create_dir rmsd_$temperature
+        cd rmsd_$temperature
+        clean 
+
+        echo 'Backbone Backbone' | gmx rms -f ../Production_$temperature/$MOLEC.xtc \
+            -s ../Production_$temperature/$MOLEC.tpr \
+            -b 10000 \
+            -o backbone.xvg >> $logFile 2>> $errFile 
+        check backbone.xvg 
+
+        echo '"Backbone" & ri 11-225' > selection.dat 
+        echo "q" >> selection.dat 
+
+        cat selection.dat | gmx make_ndx -f ../Production_$temperature/solvent_npt.gro \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+        
+        echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx rms -f ../Production_$temperature/$MOLEC.xtc \
+            -s ../Production_$temperature/$MOLEC.tpr \
+            -n index.ndx \
+            -b 10000 \
+            -o without_ter.xvg >> $logFile 2>> $errFile 
+        check without_ter.xvg
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi  
+}
+
 chi(){
     printf "\t\tCalculating phi psi chi dihedrals........." 
     if [ ! -f chi/order.xvg ] ; then 
@@ -1329,6 +1430,27 @@ chi(){
 
         gmx chi -f ../Production/$MOLEC.xtc \
             -s ../Production/$MOLEC.tpr \
+            -b 10000 \
+            -norad \
+            -rama >> $logFile 2>> $errFile 
+        check order.xvg 
+
+        printf "Success\n" 
+        cd ../ 
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
+chi_temp(){
+    printf "\t\tCalculating phi psi chi dihedrals........." 
+    if [ ! -f chi_$temperature/order.xvg ] ; then 
+        create_dir chi_$temperature
+        cd chi_$temperature
+        clean 
+
+        gmx chi -f ../Production_$temperature/$MOLEC.xtc \
+            -s ../Production_$temperature/$MOLEC.tpr \
             -b 10000 \
             -norad \
             -rama >> $logFile 2>> $errFile 
@@ -1374,6 +1496,39 @@ rgyr(){
         fi  
 } 
 
+rgyr_temp(){
+    printf "\t\tCalculating radius of gyration............" 
+    if [ ! -f rgyr_$temperature/without_ter.xvg ] ; then 
+        create_dir rgyr_$temperature
+        cd rgyr_$temperature
+        clean 
+
+        echo 'Protein' | gmx gyrate -f ../Production_$temperature/$MOLEC.xtc \
+            -s ../Production_$temperature/$MOLEC.tpr \
+            -o gyrate.xvg >> $logFile 2>> $errFile 
+        check gyrate.xvg
+
+        echo '"Backbone" & ri 11-225' > selection.dat 
+        echo "q" >> selection.dat 
+
+        cat selection.dat | gmx make_ndx -f ../Production_$temperature/solvent_npt.gro \
+            -o index.ndx >> $logFile 2>> $errFile 
+        check index.ndx 
+        
+        echo "Backbone_&_r_11_225 Backbone_&_r_11_225" | gmx gyrate -f ../Production_$temperature/$MOLEC.xtc \
+            -s ../Production_$temperature/$MOLEC.tpr \
+            -n index.ndx \
+            -b 10000 \
+            -o without_ter.xvg >> $logFile 2>> $errFile 
+        check without_ter.xvg
+
+        printf "Success\n" 
+        cd ../
+    else
+        printf "Skipped\n"
+        fi  
+} 
+
 printf "\n\t\t*** Program Beginning ***\n\n" 
 cd $MOLEC
 protein_steep
@@ -1383,21 +1538,24 @@ if ! $temp ; then
     solvent_nvt
     solvent_npt
     production 
-    #if grep -sq CNF $MOLEC.pdb ; then 
+    if grep -sq CNF $MOLEC.pdb ; then 
     #    hbond 
-    #    hbond_with_ca
+        hbond_with_ca
     #    hbond_1
-    #    hbond_2
+        hbond_2
     #    hbond_3
     #    hbond_4
     #    hbond_5
-    #    fit_hbond_with_ca
+        fit_hbond_with_ca
     #    sasa
     #    mindist 
     #    sorient
     #    rdf
     #    force_calc
-    #    fi 
+        chi
+        fi 
+    rmsd 
+    rgyr
 else 
     solvent_nvt_temp
     solvent_npt_temp
@@ -1405,11 +1563,13 @@ else
     if grep -sq CNF $MOLEC.pdb ; then 
         hbond_with_ca_temp
         hbond_2_temp
+        fit_hbond_with_ca_temp
         fi 
+    chi_temp
+    rmsd_temp
+    rgyr_temp
 fi 
 #minimage
-#rmsd 
-#chi
 #rgyr
 cd ../
 

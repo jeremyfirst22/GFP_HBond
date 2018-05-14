@@ -36,6 +36,7 @@ for molec in $molecList ; do
    
     #sbatch submit_$molec
     bash run_GFP_hbond.sh StartingStructures/$molec.pdb 290
+    bash run_GFP_hbond.sh StartingStructures/$molec.pdb
     bash run_GFP_hbond.sh StartingStructures/$molec.pdb 310
 
 
