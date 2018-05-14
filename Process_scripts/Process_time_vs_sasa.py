@@ -13,25 +13,37 @@ figRows=3
 rcFile = 'rc_files/paper.rc'
 rc_file(rcFile) 
 
+molecList = [
+        "Y92X",
+        "F114X",
+        "D117X",
+        "Y143X",
+        "F145X",
+        "F165X",
+        "N198X",
+        "N212X",
+        "M218X"]
+
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0.1,hspace=0.35,left=0.1) 
 fig.text(0.5,0.04, r"Time (ns)", ha='center', va='center') 
-fig.text(0.04,0.5, r"SASA (nm$^2$)", ha='center', va='center',rotation='vertical') 
+fig.text(0.03,0.5, r"SASA (nm$^2$)", ha='center', va='center',rotation='vertical') 
 
-molList = glob.glob('B_State/*/sasa') 
 index=0
-for mol in molList : 
+for mol in molecList : 
     print index, index/figCols, index%figRows
     ax = axarr[index/figCols,index%figCols]
 
-    datafile = mol+'/cnf_area.xvg'
+    datafile = 'B_State/GFP_%s/sasa/cnf_area.xvg'%mol
     print datafile
     try : 
         data1 = np.genfromtxt(datafile,skip_header=27) 
         data1[:,0] = data1[:,0] / 1000 
+        equilTime = len(data1) / 5 
+        data1 = data1[equilTime:] ##Discard first 10ns as equilibration time
         ax.scatter(data1[:,0],data1[:,2],color='b',s=0.1) 
     except IOError : 
         print "No file found for %s"%(datafile)  
@@ -83,8 +95,8 @@ for mol in molList :
 
 
     ax.set_title(datafile.split('/')[1].split('_')[1]) 
-    ax.set_xlim(0,50) 
-    ax.set_ylim(0,3)     
+    ax.set_xlim(10,50) 
+    ax.set_ylim(0,2.5)     
 
     index +=1
 
@@ -101,14 +113,13 @@ figD.subplots_adjust(wspace=0.1,hspace=0.35,left=0.1)
 figD.text(0.5,0.04, r"Time (ns)", ha='center', va='center') 
 figD.text(0.02,0.5, r"$\frac{d}{dt} \left < \rm{SASA} \right > (\rm{nm}^2 \rm{nm}^{-1}$)", ha='center', va='center',rotation='vertical') 
 
-molList = glob.glob('B_State/*/sasa') 
 index=0
-for mol in molList : 
+for mol in molecList : 
     print index, index/figCols, index%figRows
     ax = axarr[index/figCols,index%figCols]
     axD = axarrD[index/figCols,index%figCols]
 
-    datafile = mol+'/cnf_area.xvg'
+    datafile = 'B_State/GFP_%s/sasa/cnf_area.xvg'%mol
     try : 
         data1 = np.genfromtxt(datafile,skip_header=27) 
         data1 = data1[2500:,:] 
