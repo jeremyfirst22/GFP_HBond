@@ -11,7 +11,7 @@ figRows=3
 if not os.path.isdir('figures') : 
     os.mkdir('figures') 
 
-datafiles = glob.glob('B_State/*/hbond_5/persistent.xvg') 
+datafiles = glob.glob('B_State/*/hbond_2/persistent.xvg') 
 
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0,hspace=0.30) 
@@ -30,7 +30,7 @@ for index,file in enumerate(datafiles) :
 
     ax = axarr[index/figCols,index%figCols]
 
-    ax.loglog(data[:,0],data[:,4],color='c',label='Nearby water') 
+#    ax.loglog(data[:,0],data[:,4],color='c',label='Nearby water') 
     ax.loglog(data[:,0],data[:,5],color='b', label='HBonding water') 
     ax.loglog(data[:,0],data[:,6],color='g',label='Hbonding protein') 
 
