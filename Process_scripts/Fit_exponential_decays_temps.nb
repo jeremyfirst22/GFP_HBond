@@ -1,0 +1,1109 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     46719,       1099]
+NotebookOptionsPosition[     44324,       1050]
+NotebookOutlinePosition[     44684,       1066]
+CellTagsIndexPosition[     44641,       1063]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{"Clear", "[", 
+  RowBox[{
+  "a", ",", "b", ",", "c", ",", "d", ",", "x", ",", "data", ",", "molecList", 
+   ",", "nlm", ",", "raws", ",", "fits", ",", "adjR", ",", "rvalues"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"molecList", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{
+     "\"\<GFP_Y143X\>\"", ",", "\"\<GFP_D117X\>\"", ",", "\"\<GFP_F114X\>\"", 
+      ",", "\"\<GFP_F145X\>\"", ",", "\"\<GFP_Y92X\>\"", " ", ",", 
+      "\"\<GFP_N198X\>\"", ",", "\"\<GFP_F165X\>\"", ",", "\"\<GFP_M218X\>\"",
+       ",", "\"\<GFP_N212X\>\""}], "}"}]}], " ", ";"}], 
+  " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"molecList", "=", 
+     RowBox[{"{", "\"\<GFP_Y92X\>\"", "}"}]}], " ", ";"}], " ", 
+   "*)"}]}]}], "Input",
+ CellChangeTimes->{{3.724712011964498*^9, 3.7247120137344713`*^9}, {
+   3.724729617414474*^9, 3.724729668397036*^9}, {3.724760356400878*^9, 
+   3.724760363558737*^9}, {3.7247612149963627`*^9, 3.724761221005816*^9}, 
+   3.724761387686821*^9, {3.724766396583685*^9, 3.7247663967350597`*^9}, {
+   3.7247798046571627`*^9, 3.724779826321859*^9}, {3.724779984982318*^9, 
+   3.7247799852759523`*^9}, {3.724780076618819*^9, 3.7247801340407553`*^9}, {
+   3.724780201158699*^9, 
+   3.724780205269053*^9}},ExpressionUUID->"d5cc5068-38b5-4d82-9f85-\
+782122a59b16"],
+
+Cell[CellGroupData[{
+
+Cell["Protein: ", "Subsubsection",
+ CellChangeTimes->{{3.72476636946603*^9, 
+  3.724766374326646*^9}},ExpressionUUID->"402ebb8a-e2c8-4f25-8104-\
+947b355f98d6"],
+
+Cell[CellGroupData[{
+
+Cell["Single exponential:", "Text",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.},
+ CellChangeTimes->{{3.724766377246006*^9, 
+  3.724766408840088*^9}},ExpressionUUID->"2e51e259-6c89-4228-8001-\
+4f51424cf2a1"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "raws", ",", "fits", ",", "nlms", ",", "allData", ",", "rvalues", ",", 
+      "adjR"}], "}"}], "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}]}], "}"}]}], " ", ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"i", "  ", "=", " ", "1"}], " ", ",", " ", 
+     RowBox[{"i", " ", "\[LessEqual]", 
+      RowBox[{"Length", "[", "molecList", "]"}]}], " ", ",", " ", 
+     RowBox[{"i", "++"}], ",", 
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"data", " ", "=", " ", 
+        RowBox[{"Import", "[", 
+         RowBox[{
+          RowBox[{"StringReplace", "[", 
+           RowBox[{
+           "\"\</Users/jfirst/GFP_HBond/B_State/*/hbond_2/persistent.xvg\>\"",
+             ",", 
+            RowBox[{"\"\<*\>\"", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", "\"\<Table\>\"",
+           ",", 
+          RowBox[{"HeaderLines", "\[Rule]", "24"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", 
+         RowBox[{"molecList", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<: \\t\>\""}], "]"}], " ", 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"y", " ", "=", " ", 
+        RowBox[{"data", "[", 
+         RowBox[{"[", 
+          RowBox[{"All", ",", "7"}], "]"}], "]"}]}], " ", ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"allData", " ", "=", " ", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allData", ",", "y"}], "]"}]}], " ", ";"}], " ", "*)"}], 
+       " ", "\[IndentingNewLine]", 
+       RowBox[{"nlm", " ", "=", " ", 
+        RowBox[{"NonlinearModelFit", "[", 
+         RowBox[{
+          RowBox[{"y", "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;"}], "]"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"a", " ", 
+             RowBox[{"E", "^", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"-", "b"}], " ", "x"}], ")"}]}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"a", ">", "0"}], ",", 
+              RowBox[{"b", ">", "0"}]}], "}"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"a", ",", "b"}], "}"}], ",", "x", ",", 
+          RowBox[{"MaxIterations", "\[Rule]", "200"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"fits", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"fits", ",", " ", 
+          RowBox[{"LogLogPlot", "[", 
+           RowBox[{
+            RowBox[{"nlm", "//", "Normal"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"{", 
+             RowBox[{"x", ",", "1", ",", 
+              RowBox[{"Length", "[", "y", "]"}]}], "}"}], ",", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Red", ",", "Dashed"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"raws", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"raws", ",", " ", 
+          RowBox[{"ListLogLogPlot", "[", 
+           RowBox[{"y", ",", "\[IndentingNewLine]", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Black", ",", "Thick"}], "}"}]}], ",", 
+            RowBox[{"Joined", "\[Rule]", "True"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", "\"\<Params: \>\"", ",", 
+         RowBox[{"nlm", "[", "\"\<BestFitParameters\>\"", "]"}], ",", 
+         "\"\<\\t r= \>\"", ",", " ", 
+         RowBox[{"Sqrt", "[", 
+          RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}], ",", 
+         "\"\<\\t Adjr= \>\"", ",", " ", 
+         RowBox[{
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}], 
+          "\"\<\\n\>\""}]}], "]"}], " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"rvalues", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"rvalues", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}]}], "]"}]}], 
+       " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"adjR", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"adjR", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}]}], 
+         "]"}]}], " ", ";"}], " ", "\[IndentingNewLine]", "}"}]}], "]"}], 
+   ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{
+   "\"\</Users/jfirst/GFP_HBond/figures/Protein_single_exp_decay.pdf\>\"", 
+    ",", 
+    RowBox[{"GraphicsGrid", "[", 
+     RowBox[{"ArrayReshape", "[", 
+      RowBox[{
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"Show", "[", 
+          RowBox[{
+           RowBox[{"fits", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], ",", 
+           RowBox[{"raws", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], ",", 
+           RowBox[{"Graphics", "[", 
+            RowBox[{"{", 
+             RowBox[{"Text", "[", 
+              RowBox[{
+               RowBox[{"\"\<r = \>\"", "<>", 
+                RowBox[{"ToString", "[", 
+                 RowBox[{"rvalues", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], "]"}], "<>", 
+                "\"\<\\n Adj r = \>\"", "<>", 
+                RowBox[{"ToString", "[", 
+                 RowBox[{"adjR", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ",", 
+               RowBox[{"{", 
+                RowBox[{"9", ",", "5.8"}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "}"}], "]"}], ",", 
+           "\[IndentingNewLine]", 
+           RowBox[{"PlotLabel", "\[Rule]", 
+            RowBox[{"molecList", "[", 
+             RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", 
+           RowBox[{"Length", "[", "molecList", "]"}]}], "}"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"3", ",", "3"}], "}"}]}], "]"}], "]"}]}], "]"}], " ", 
+  ";"}]}], "Input",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.},
+ CellChangeTimes->{{3.724729342721837*^9, 3.724729343484303*^9}, {
+   3.724729700973528*^9, 3.724729836607136*^9}, {3.724729878209312*^9, 
+   3.724729989275317*^9}, {3.724730021075802*^9, 3.724730055872382*^9}, {
+   3.724730134133223*^9, 3.7247302964106817`*^9}, {3.72473034271912*^9, 
+   3.724730578553402*^9}, {3.7247308123851347`*^9, 3.724730826526897*^9}, {
+   3.724730874234182*^9, 3.724730894173774*^9}, {3.724730928749627*^9, 
+   3.7247309299387302`*^9}, {3.724730987724475*^9, 3.7247310251619873`*^9}, {
+   3.724760035406382*^9, 3.724760036196556*^9}, {3.724760169116026*^9, 
+   3.724760222003398*^9}, {3.724760286035841*^9, 3.724760296457212*^9}, {
+   3.724760352402275*^9, 3.724760352719831*^9}, {3.724760394240486*^9, 
+   3.724760566427401*^9}, {3.724760640457458*^9, 3.7247606480041637`*^9}, {
+   3.7247607742592077`*^9, 3.724760809954328*^9}, {3.7247608459409533`*^9, 
+   3.724760892777624*^9}, {3.724760941283422*^9, 3.724760941937539*^9}, {
+   3.724761033040259*^9, 3.7247610663420153`*^9}, 3.7247611278815937`*^9, {
+   3.724761168091786*^9, 3.7247611844708633`*^9}, {3.7247612682575827`*^9, 
+   3.724761289327339*^9}, {3.724761347061612*^9, 3.724761513488617*^9}, {
+   3.724761655434984*^9, 3.7247617962911043`*^9}, {3.724761851983176*^9, 
+   3.724762017647552*^9}, {3.7247620661265287`*^9, 3.724762092730836*^9}, {
+   3.724762157461452*^9, 3.724762223684376*^9}, {3.7247623705171022`*^9, 
+   3.7247623735325336`*^9}, {3.724762418244904*^9, 3.7247624208427143`*^9}, {
+   3.7247624520766487`*^9, 3.724762539637932*^9}, {3.724763203433326*^9, 
+   3.7247632270717697`*^9}, {3.724763412219069*^9, 3.724763459737756*^9}, {
+   3.724763503535006*^9, 3.7247635225926237`*^9}, {3.7247636150051117`*^9, 
+   3.7247636262843437`*^9}, {3.724763659546722*^9, 3.724763668104794*^9}, {
+   3.724763722323844*^9, 3.72476372245442*^9}, {3.7247638017558117`*^9, 
+   3.724763801864646*^9}, {3.724766394607829*^9, 3.7247664330188637`*^9}, 
+   3.724767354167241*^9, {3.724767421717393*^9, 3.724767428941903*^9}, {
+   3.724767641027952*^9, 3.724767641129568*^9}, {3.724777277351728*^9, 
+   3.724777305291996*^9}, {3.724777337563719*^9, 3.7247773501452627`*^9}, {
+   3.7247797158622017`*^9, 3.724779716111739*^9}, {3.724779794598418*^9, 
+   3.7247798009637117`*^9}, 3.724780068690495*^9, {3.724780247862995*^9, 
+   3.724780266822294*^9}},ExpressionUUID->"06fc249a-52cf-48c2-bbd3-\
+026688d0e8a4"]
+}, Open  ]],
+
+Cell["\<\
+GFP_Y143X: \tParams: {a -> 487.538, b -> 0.413136}\t r= 0.997447\t Adjr= \
+0.997446 
+GFP_D117X: \tParams: {a -> 53.1723, b -> 0.22324}\t r= 0.99571\t Adjr= \
+0.995709 
+GFP_F114X: \tParams: {a -> 1.6499, b -> 0.254871}\t r= 0.904915\t Adjr= \
+0.904895 
+GFP_F145X: \tParams: {a -> 184.11, b -> 0.480009}\t r= 0.9946\t Adjr= 0.994599 
+GFP_Y92X: \tParams: {a -> 634.064, b -> 0.210518}\t r= 0.955812\t Adjr= \
+0.955803 
+GFP_N198X: \tParams: {a -> 57.5207, b -> 0.264713}\t r= 0.999098\t Adjr= \
+0.999098 
+GFP_F165X: \tParams: {a -> 542.522, b -> 0.133046}\t r= 0.999478\t Adjr= \
+0.999478 
+GFP_M218X: \tParams: {a -> 32.5404, b -> 0.445907}\t r= 0.994981\t Adjr= \
+0.99498 
+GFP_N212X: \tParams: {a -> 3620.15, b -> 8.19432}\t r= 1.\t Adjr= 1. \
+\>", "Print",
+ CellChangeTimes->{
+  3.724780549063846*^9},ExpressionUUID->"aac10792-813f-469a-831f-\
+bd62b3c389b8"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "NonlinearModelFit","cvmit",
+   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
+\\*RowBox[{\\\"200\\\"}]\\) iterations.\"",2,7,1,32705457820714474385,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.724780589272005*^9},ExpressionUUID->"b5ee80c0-de37-4e7f-8915-\
+21b7d4cd0a97"],
+
+Cell[CellGroupData[{
+
+Cell["Double exponential: ", "Text",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.},
+ CellChangeTimes->{{3.7247664433066807`*^9, 3.724766446859044*^9}, 
+   3.724767530726996*^9, 
+   3.724779706780221*^9},ExpressionUUID->"93b5fc5e-d91a-4f00-9fd1-\
+954851bfb40c"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "raws", ",", "fits", ",", "nlms", ",", "allData", ",", "rvalues", ",", 
+      "adjR"}], "}"}], "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}]}], "}"}]}], " ", ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"i", "  ", "=", " ", "1"}], " ", ",", " ", 
+     RowBox[{"i", " ", "\[LessEqual]", 
+      RowBox[{"Length", "[", "molecList", "]"}]}], " ", ",", " ", 
+     RowBox[{"i", "++"}], ",", 
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"data", " ", "=", " ", 
+        RowBox[{"Import", "[", 
+         RowBox[{
+          RowBox[{"StringReplace", "[", 
+           RowBox[{
+           "\"\</Users/jfirst/GFP_HBond/B_State/*/hbond_2/persistent.xvg\>\"",
+             ",", 
+            RowBox[{"\"\<*\>\"", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", "\"\<Table\>\"",
+           ",", 
+          RowBox[{"HeaderLines", "\[Rule]", "24"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", 
+         RowBox[{"molecList", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<: \\t\>\""}], "]"}], " ", 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"y", " ", "=", " ", 
+        RowBox[{"data", "[", 
+         RowBox[{"[", 
+          RowBox[{"All", ",", "7"}], "]"}], "]"}]}], " ", ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"allData", " ", "=", " ", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allData", ",", "y"}], "]"}]}], " ", ";"}], " ", "*)"}], 
+       " ", "\[IndentingNewLine]", 
+       RowBox[{"nlm", " ", "=", " ", 
+        RowBox[{"NonlinearModelFit", "[", 
+         RowBox[{
+          RowBox[{"y", "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;"}], "]"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"a", " ", 
+              RowBox[{"E", "^", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"-", "b"}], " ", "x"}], ")"}]}]}], "+", 
+             RowBox[{"c", " ", 
+              RowBox[{"E", "^", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"-", "d"}], " ", "x"}], ")"}]}]}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"a", ">", "0"}], ",", 
+              RowBox[{"b", ">", "0"}], ",", 
+              RowBox[{"c", ">", "0"}], ",", 
+              RowBox[{"d", ">", "0"}]}], "}"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"a", ",", "b", ",", "c", ",", "d"}], "}"}], ",", "x", ",", 
+          
+          RowBox[{"MaxIterations", "\[Rule]", "200"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"fits", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"fits", ",", " ", 
+          RowBox[{"LogLogPlot", "[", 
+           RowBox[{
+            RowBox[{"nlm", "//", "Normal"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"{", 
+             RowBox[{"x", ",", "1", ",", 
+              RowBox[{"Length", "[", "y", "]"}]}], "}"}], ",", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Red", ",", "Dashed"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"raws", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"raws", ",", " ", 
+          RowBox[{"ListLogLogPlot", "[", 
+           RowBox[{"y", ",", "\[IndentingNewLine]", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Black", ",", "Thick"}], "}"}]}], ",", 
+            RowBox[{"Joined", "\[Rule]", "True"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", "\"\<Params: \>\"", ",", 
+         RowBox[{"nlm", "[", "\"\<BestFitParameters\>\"", "]"}], ",", 
+         "\"\<\\t r= \>\"", ",", " ", 
+         RowBox[{"Sqrt", "[", 
+          RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}], ",", 
+         "\"\<\\t Adjr= \>\"", ",", " ", 
+         RowBox[{
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}], 
+          "\"\<\\n\>\""}]}], "]"}], " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"rvalues", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"rvalues", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}]}], "]"}]}], 
+       " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"adjR", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"adjR", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}]}], 
+         "]"}]}], " ", ";"}], " ", "\[IndentingNewLine]", "}"}]}], "]"}], 
+   ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Export", "[", 
+    RowBox[{
+    "\"\</Users/jfirst/GFP_HBond/figures/Protein_double_exp_decay.pdf\>\"", 
+     ",", 
+     RowBox[{"GraphicsGrid", "[", 
+      RowBox[{"ArrayReshape", "[", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"Show", "[", 
+           RowBox[{
+            RowBox[{"fits", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"raws", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"Graphics", "[", 
+             RowBox[{"{", 
+              RowBox[{"Text", "[", 
+               RowBox[{
+                RowBox[{"\"\<r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"rvalues", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}], "<>", 
+                 "\"\<\\n Adj r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"adjR", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"9", ",", "5.8"}], "}"}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "}"}], "]"}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotLabel", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", "1", ",", 
+            RowBox[{"Length", "[", "molecList", "]"}]}], "}"}]}], "]"}], ",", 
+        
+        RowBox[{"{", 
+         RowBox[{"3", ",", "3"}], "}"}]}], "]"}], "]"}]}], "]"}], " ", ";"}], 
+  " "}]}], "Input",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.},
+ CellChangeTimes->{{3.724763976174552*^9, 3.724763983810032*^9}, {
+   3.7247646927168016`*^9, 3.724764730191462*^9}, 3.7247647819598827`*^9, {
+   3.724764861285325*^9, 3.724764863566307*^9}, {3.724765213932901*^9, 
+   3.724765259074686*^9}, {3.724766439690485*^9, 3.72476644999931*^9}, {
+   3.7247666075410833`*^9, 3.724766607675741*^9}, {3.724767364748725*^9, 
+   3.724767388762909*^9}, {3.7247674394620543`*^9, 3.724767445837295*^9}, 
+   3.7247675307278643`*^9, {3.724767653131805*^9, 3.724767653273435*^9}, {
+   3.724777446909075*^9, 3.724777475663931*^9}, {3.724779690926158*^9, 
+   3.724779706781178*^9}, {3.724779894019641*^9, 
+   3.724779897804987*^9}},ExpressionUUID->"2b27b474-9248-4c54-9d01-\
+c770523cd699"]
+}, Open  ]],
+
+Cell["\<\
+GFP_Y143X: \tParams: {a -> 243.778, b -> 0.413136, c -> 243.76, d -> \
+0.413136}\t r= 0.997447\t Adjr= 0.997446 
+GFP_D117X: \tParams: {a -> 34.642, b -> 0.337536, c -> 21.9926, d -> \
+0.151216}\t r= 0.996523\t Adjr= 0.996522 
+GFP_F114X: \tParams: {a -> 0.776528, b -> 0.254871, c -> 0.873375, d -> \
+0.254871}\t r= 0.904915\t Adjr= 0.904875 
+GFP_F145X: \tParams: {a -> 92.0682, b -> 0.480009, c -> 92.0421, d -> \
+0.480009}\t r= 0.9946\t Adjr= 0.994598 
+GFP_Y92X: \tParams: {a -> 646.481, b -> 0.234639, c -> 13.7001, d -> \
+0.00129211}\t r= 0.997887\t Adjr= 0.997886 
+GFP_N198X: \tParams: {a -> 48.7089, b -> 0.238665, c -> 14.8902, d -> \
+0.789082}\t r= 0.999483\t Adjr= 0.999483 
+GFP_F165X: \tParams: {a -> 390.199, b -> 0.168974, c -> 167.793, d -> \
+0.0895727}\t r= 0.999746\t Adjr= 0.999746 
+GFP_M218X: \tParams: {a -> 16.3346, b -> 0.445907, c -> 16.2058, d -> \
+0.445907}\t r= 0.994981\t Adjr= 0.994979 
+GFP_N212X: \tParams: {a -> 2215.93, b -> 7.84711, c -> 95.5781, d -> 6.57109}\
+\t r= 1.\t Adjr= 1. \
+\>", "Print",
+ CellChangeTimes->{
+  3.724780646642954*^9},ExpressionUUID->"f1359780-88e0-44f3-a778-\
+2dd58ff9163a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Water: ", "Subsubsection",
+ CellChangeTimes->{{3.72476636946603*^9, 3.724766374326646*^9}, {
+  3.7247676809915113`*^9, 
+  3.724767682717289*^9}},ExpressionUUID->"525d85ff-2c59-4c74-a542-\
+a62665602c08"],
+
+Cell[CellGroupData[{
+
+Cell["Single exponential:", "Text",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.},
+ CellChangeTimes->{{3.724766377246006*^9, 
+  3.724766408840088*^9}},ExpressionUUID->"7e2b0b57-2ddd-40a7-9096-\
+47237d3eb542"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "raws", ",", "fits", ",", "nlms", ",", "allData", ",", "rvalues", ",", 
+      "adjR"}], "}"}], "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}]}], "}"}]}], " ", ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"i", "  ", "=", " ", "1"}], " ", ",", " ", 
+     RowBox[{"i", " ", "\[LessEqual]", 
+      RowBox[{"Length", "[", "molecList", "]"}]}], " ", ",", " ", 
+     RowBox[{"i", "++"}], ",", 
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"data", " ", "=", " ", 
+        RowBox[{"Import", "[", 
+         RowBox[{
+          RowBox[{"StringReplace", "[", 
+           RowBox[{
+           "\"\</Users/jfirst/GFP_HBond/B_State/*/hbond_2/persistent.xvg\>\"",
+             ",", 
+            RowBox[{"\"\<*\>\"", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", "\"\<Table\>\"",
+           ",", 
+          RowBox[{"HeaderLines", "\[Rule]", "24"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", 
+         RowBox[{"molecList", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<: \\t\>\""}], "]"}], " ", 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"y", " ", "=", " ", 
+        RowBox[{"data", "[", 
+         RowBox[{"[", 
+          RowBox[{"All", ",", "6"}], "]"}], "]"}]}], " ", ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"allData", " ", "=", " ", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allData", ",", "y"}], "]"}]}], " ", ";"}], " ", "*)"}], 
+       " ", "\[IndentingNewLine]", 
+       RowBox[{"nlm", " ", "=", " ", 
+        RowBox[{"NonlinearModelFit", "[", 
+         RowBox[{
+          RowBox[{"y", "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;"}], "]"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"a", " ", 
+             RowBox[{"E", "^", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"-", "b"}], " ", "x"}], ")"}]}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"a", ">", "0"}], ",", 
+              RowBox[{"b", ">", "0"}]}], "}"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"a", ",", "b"}], "}"}], ",", "x", ",", 
+          RowBox[{"MaxIterations", "\[Rule]", "200"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"fits", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"fits", ",", " ", 
+          RowBox[{"LogLogPlot", "[", 
+           RowBox[{
+            RowBox[{"nlm", "//", "Normal"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"{", 
+             RowBox[{"x", ",", "1", ",", 
+              RowBox[{"Length", "[", "y", "]"}]}], "}"}], ",", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Red", ",", "Dashed"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"raws", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"raws", ",", " ", 
+          RowBox[{"ListLogLogPlot", "[", 
+           RowBox[{"y", ",", "\[IndentingNewLine]", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Black", ",", "Thick"}], "}"}]}], ",", 
+            RowBox[{"Joined", "\[Rule]", "True"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", "\"\<Params: \>\"", ",", 
+         RowBox[{"nlm", "[", "\"\<BestFitParameters\>\"", "]"}], ",", 
+         "\"\<\\t r= \>\"", ",", " ", 
+         RowBox[{"Sqrt", "[", 
+          RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}], ",", 
+         "\"\<\\t Adjr= \>\"", ",", " ", 
+         RowBox[{
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}], 
+          "\"\<\\n\>\""}]}], "]"}], " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"rvalues", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"rvalues", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}]}], "]"}]}], 
+       " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"adjR", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"adjR", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}]}], 
+         "]"}]}], " ", ";"}], " ", "\[IndentingNewLine]", "}"}]}], "]"}], 
+   ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Export", "[", 
+    RowBox[{
+    "\"\</Users/jfirst/GFP_HBond/figures/Water_single_exp_decay.pdf\>\"", ",", 
+     RowBox[{"GraphicsGrid", "[", 
+      RowBox[{"ArrayReshape", "[", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"Show", "[", 
+           RowBox[{
+            RowBox[{"fits", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"raws", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"Graphics", "[", 
+             RowBox[{"{", 
+              RowBox[{"Text", "[", 
+               RowBox[{
+                RowBox[{"\"\<r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"rvalues", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}], "<>", 
+                 "\"\<\\n Adj r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"adjR", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"9", ",", "5.8"}], "}"}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "}"}], "]"}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotLabel", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", "1", ",", 
+            RowBox[{"Length", "[", "molecList", "]"}]}], "}"}]}], "]"}], ",", 
+        
+        RowBox[{"{", 
+         RowBox[{"3", ",", "3"}], "}"}]}], "]"}], "]"}]}], "]"}], " ", ";"}], 
+  " "}]}], "Input",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.},
+ CellChangeTimes->{{3.724729342721837*^9, 3.724729343484303*^9}, {
+   3.724729700973528*^9, 3.724729836607136*^9}, {3.724729878209312*^9, 
+   3.724729989275317*^9}, {3.724730021075802*^9, 3.724730055872382*^9}, {
+   3.724730134133223*^9, 3.7247302964106817`*^9}, {3.72473034271912*^9, 
+   3.724730578553402*^9}, {3.7247308123851347`*^9, 3.724730826526897*^9}, {
+   3.724730874234182*^9, 3.724730894173774*^9}, {3.724730928749627*^9, 
+   3.7247309299387302`*^9}, {3.724730987724475*^9, 3.7247310251619873`*^9}, {
+   3.724760035406382*^9, 3.724760036196556*^9}, {3.724760169116026*^9, 
+   3.724760222003398*^9}, {3.724760286035841*^9, 3.724760296457212*^9}, {
+   3.724760352402275*^9, 3.724760352719831*^9}, {3.724760394240486*^9, 
+   3.724760566427401*^9}, {3.724760640457458*^9, 3.7247606480041637`*^9}, {
+   3.7247607742592077`*^9, 3.724760809954328*^9}, {3.7247608459409533`*^9, 
+   3.724760892777624*^9}, {3.724760941283422*^9, 3.724760941937539*^9}, {
+   3.724761033040259*^9, 3.7247610663420153`*^9}, 3.7247611278815937`*^9, {
+   3.724761168091786*^9, 3.7247611844708633`*^9}, {3.7247612682575827`*^9, 
+   3.724761289327339*^9}, {3.724761347061612*^9, 3.724761513488617*^9}, {
+   3.724761655434984*^9, 3.7247617962911043`*^9}, {3.724761851983176*^9, 
+   3.724762017647552*^9}, {3.7247620661265287`*^9, 3.724762092730836*^9}, {
+   3.724762157461452*^9, 3.724762223684376*^9}, {3.7247623705171022`*^9, 
+   3.7247623735325336`*^9}, {3.724762418244904*^9, 3.7247624208427143`*^9}, {
+   3.7247624520766487`*^9, 3.724762539637932*^9}, {3.724763203433326*^9, 
+   3.7247632270717697`*^9}, {3.724763412219069*^9, 3.724763459737756*^9}, {
+   3.724763503535006*^9, 3.7247635225926237`*^9}, {3.7247636150051117`*^9, 
+   3.7247636262843437`*^9}, {3.724763659546722*^9, 3.724763668104794*^9}, {
+   3.724763722323844*^9, 3.72476372245442*^9}, {3.7247638017558117`*^9, 
+   3.724763801864646*^9}, {3.724766394607829*^9, 3.7247664330188637`*^9}, 
+   3.724767354167241*^9, {3.724767421717393*^9, 3.724767428941903*^9}, {
+   3.724767641027952*^9, 3.724767641129568*^9}, {3.724767698415894*^9, 
+   3.724767698511739*^9}, {3.724777501377798*^9, 3.72477753951726*^9}, {
+   3.72477807369692*^9, 3.724778085188426*^9}, 3.72477812726613*^9, {
+   3.724779660824057*^9, 
+   3.724779661063952*^9}},ExpressionUUID->"cd5903ff-6517-4d24-b41e-\
+7f80e4379396"]
+}, Open  ]],
+
+Cell["\<\
+GFP_Y143X: \tParams: {a -> 26.1619, b -> 0.390156}\t r= 0.991458\t Adjr= \
+0.991456 
+GFP_D117X: \tParams: {a -> 3457.75, b -> 0.601706}\t r= 0.999917\t Adjr= \
+0.999917 
+GFP_F114X: \tParams: {a -> 3945.72, b -> 0.429509}\t r= 0.9997\t Adjr= 0.9997 \
+
+GFP_F145X: \tParams: {a -> 13.1507, b -> 0.00148626}\t r= 0.965036\t Adjr= \
+0.965029 
+GFP_Y92X: \tParams: {a -> 51.3136, b -> 0.35925}\t r= 0.992592\t Adjr= 0.99259 
+GFP_N198X: \tParams: {a -> 4253.94, b -> 0.549197}\t r= 0.99979\t Adjr= \
+0.99979 
+GFP_F165X: \tParams: {a -> 844.647, b -> 0.21678}\t r= 0.995367\t Adjr= \
+0.995367 
+GFP_M218X: \tParams: {a -> 199.747, b -> 0.0268023}\t r= 0.992217\t Adjr= \
+0.992216 
+GFP_N212X: \tParams: {a -> 3797.13, b -> 0.723252}\t r= 0.999034\t Adjr= \
+0.999034 \
+\>", "Print",
+ CellChangeTimes->{
+  3.724780813778728*^9},ExpressionUUID->"7f9ecddd-f6b1-461e-bb1b-\
+5892601e7e61"],
+
+Cell[CellGroupData[{
+
+Cell["Double exponential: ", "Text",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.},
+ CellChangeTimes->{{3.7247664433066807`*^9, 3.724766446859044*^9}, 
+   3.724767530726996*^9, 
+   3.7247796796015472`*^9},ExpressionUUID->"b2cff5d5-d652-40fc-9c8a-\
+4be6843c8f59"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "raws", ",", "fits", ",", "nlms", ",", "allData", ",", "rvalues", ",", 
+      "adjR"}], "}"}], "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}], ",", 
+      RowBox[{"{", "}"}]}], "}"}]}], " ", ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"i", "  ", "=", " ", "1"}], " ", ",", " ", 
+     RowBox[{"i", " ", "\[LessEqual]", 
+      RowBox[{"Length", "[", "molecList", "]"}]}], " ", ",", " ", 
+     RowBox[{"i", "++"}], ",", 
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"data", " ", "=", " ", 
+        RowBox[{"Import", "[", 
+         RowBox[{
+          RowBox[{"StringReplace", "[", 
+           RowBox[{
+           "\"\</Users/jfirst/GFP_HBond/B_State/*/hbond_2/persistent.xvg\>\"",
+             ",", 
+            RowBox[{"\"\<*\>\"", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", "\"\<Table\>\"",
+           ",", 
+          RowBox[{"HeaderLines", "\[Rule]", "24"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", 
+         RowBox[{"molecList", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<: \\t\>\""}], "]"}], " ", 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"y", " ", "=", " ", 
+        RowBox[{"data", "[", 
+         RowBox[{"[", 
+          RowBox[{"All", ",", "6"}], "]"}], "]"}]}], " ", ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"allData", " ", "=", " ", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allData", ",", "y"}], "]"}]}], " ", ";"}], " ", "*)"}], 
+       " ", "\[IndentingNewLine]", 
+       RowBox[{"nlm", " ", "=", " ", 
+        RowBox[{"NonlinearModelFit", "[", 
+         RowBox[{
+          RowBox[{"y", "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;"}], "]"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"a", " ", 
+              RowBox[{"E", "^", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"-", "b"}], " ", "x"}], ")"}]}]}], "+", 
+             RowBox[{"c", " ", 
+              RowBox[{"E", "^", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"-", "d"}], " ", "x"}], ")"}]}]}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"a", ">", "0"}], ",", 
+              RowBox[{"b", ">", "0"}], ",", 
+              RowBox[{"c", ">", "0"}], ",", 
+              RowBox[{"d", ">", "0"}]}], "}"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"a", ",", "b", ",", "c", ",", "d"}], "}"}], ",", "x", ",", 
+          
+          RowBox[{"MaxIterations", "\[Rule]", "200"}]}], "]"}]}], ";", " ", 
+       "\[IndentingNewLine]", 
+       RowBox[{"fits", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"fits", ",", " ", 
+          RowBox[{"LogLogPlot", "[", 
+           RowBox[{
+            RowBox[{"nlm", "//", "Normal"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"{", 
+             RowBox[{"x", ",", "1", ",", 
+              RowBox[{"Length", "[", "y", "]"}]}], "}"}], ",", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Red", ",", "Dashed"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"raws", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"raws", ",", " ", 
+          RowBox[{"ListLogLogPlot", "[", 
+           RowBox[{"y", ",", "\[IndentingNewLine]", 
+            RowBox[{"PlotRange", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"0.5", ",", "1000"}], "}"}]}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotStyle", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"Black", ",", "Thick"}], "}"}]}], ",", 
+            RowBox[{"Joined", "\[Rule]", "True"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"ImageSize", "\[Rule]", "\"\<Small\>\""}], ",", 
+            RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+            RowBox[{"Axes", "\[Rule]", "None"}]}], "]"}]}], "]"}]}], " ", ";",
+        " ", "\[IndentingNewLine]", 
+       RowBox[{"WriteString", "[", 
+        RowBox[{"\"\<stdout\>\"", ",", "\"\<Params: \>\"", ",", 
+         RowBox[{"nlm", "[", "\"\<BestFitParameters\>\"", "]"}], ",", 
+         "\"\<\\t r= \>\"", ",", " ", 
+         RowBox[{"Sqrt", "[", 
+          RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}], ",", 
+         "\"\<\\t Adjr= \>\"", ",", " ", 
+         RowBox[{
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}], 
+          "\"\<\\n\>\""}]}], "]"}], " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"rvalues", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"rvalues", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<RSquared\>\"", "]"}], "]"}]}], "]"}]}], 
+       " ", ";", " ", "\[IndentingNewLine]", 
+       RowBox[{"adjR", " ", "=", " ", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"adjR", ",", 
+          RowBox[{"Sqrt", "[", 
+           RowBox[{"nlm", "[", "\"\<AdjustedRSquared\>\"", "]"}], "]"}]}], 
+         "]"}]}], " ", ";"}], " ", "\[IndentingNewLine]", "}"}]}], "]"}], 
+   ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Export", "[", 
+    RowBox[{
+    "\"\</Users/jfirst/GFP_HBond/figures/Water_double_exp_decay.pdf\>\"", ",", 
+     RowBox[{"GraphicsGrid", "[", 
+      RowBox[{"ArrayReshape", "[", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"Show", "[", 
+           RowBox[{
+            RowBox[{"fits", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"raws", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], ",", 
+            RowBox[{"Graphics", "[", 
+             RowBox[{"{", 
+              RowBox[{"Text", "[", 
+               RowBox[{
+                RowBox[{"\"\<r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"rvalues", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}], "<>", 
+                 "\"\<\\n Adj r = \>\"", "<>", 
+                 RowBox[{"ToString", "[", 
+                  RowBox[{"adjR", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"9", ",", "5.8"}], "}"}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "}"}], "]"}], ",", 
+            "\[IndentingNewLine]", 
+            RowBox[{"PlotLabel", "\[Rule]", 
+             RowBox[{"molecList", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", "1", ",", 
+            RowBox[{"Length", "[", "molecList", "]"}]}], "}"}]}], "]"}], ",", 
+        
+        RowBox[{"{", 
+         RowBox[{"3", ",", "3"}], "}"}]}], "]"}], "]"}]}], "]"}], " ", ";"}], 
+  " "}]}], "Input",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.},
+ CellChangeTimes->{{3.724763976174552*^9, 3.724763983810032*^9}, {
+   3.7247646927168016`*^9, 3.724764730191462*^9}, 3.7247647819598827`*^9, {
+   3.724764861285325*^9, 3.724764863566307*^9}, {3.724765213932901*^9, 
+   3.724765259074686*^9}, {3.724766439690485*^9, 3.72476644999931*^9}, {
+   3.7247666075410833`*^9, 3.724766607675741*^9}, {3.724767364748725*^9, 
+   3.724767388762909*^9}, {3.7247674394620543`*^9, 3.724767445837295*^9}, 
+   3.7247675307278643`*^9, {3.724767653131805*^9, 3.724767653273435*^9}, {
+   3.724767711975656*^9, 3.7247677120575457`*^9}, {3.724777551444783*^9, 
+   3.724777587114485*^9}, {3.72477784501222*^9, 3.7247778458734293`*^9}, {
+   3.724778046569234*^9, 3.724778048432933*^9}, {3.724778106873958*^9, 
+   3.7247781310267067`*^9}, {3.724779636305153*^9, 3.724779636665224*^9}, 
+   3.724779679602517*^9},ExpressionUUID->"453a5121-6384-420d-8ab0-\
+29db1461d22d"]
+}, Open  ]],
+
+Cell["\<\
+GFP_Y143X: \tParams: {a -> 13.0651, b -> 0.390156, c -> 13.0968, d -> \
+0.390156}\t r= 0.991458\t Adjr= 0.991455 
+GFP_D117X: \tParams: {a -> 72.4532, b -> 0.251398, c -> 3426.53, d -> \
+0.621295}\t r= 0.999939\t Adjr= 0.999939 
+GFP_F114X: \tParams: {a -> 1972.86, b -> 0.429509, c -> 1972.86, d -> \
+0.429509}\t r= 0.9997\t Adjr= 0.9997 
+GFP_F145X: \tParams: {a -> 11.9296, b -> 0.00611796, c -> 6.45721, d -> \
+0.000764996}\t r= 0.989677\t Adjr= 0.989673 
+GFP_Y92X: \tParams: {a -> 25.7032, b -> 0.35925, c -> 25.6104, d -> 0.35925}\t\
+ r= 0.992592\t Adjr= 0.992589 
+GFP_N198X: \tParams: {a -> 2126.96, b -> 0.549197, c -> 2126.98, d -> \
+0.549197}\t r= 0.99979\t Adjr= 0.99979 
+GFP_F165X: \tParams: {a -> 846.399, b -> 0.262651, c -> 51.7747, d -> \
+0.035659}\t r= 0.999416\t Adjr= 0.999416 
+GFP_M218X: \tParams: {a -> 116.056, b -> 0.181274, c -> 153.139, d -> \
+0.0210353}\t r= 0.999446\t Adjr= 0.999446 
+GFP_N212X: \tParams: {a -> 1898.25, b -> 0.723252, c -> 1898.88, d -> \
+0.723252}\t r= 0.999034\t Adjr= 0.999034 \
+\>", "Print",
+ CellChangeTimes->{
+  3.724780868243545*^9},ExpressionUUID->"b346a674-fec3-4153-8439-\
+650649eb0c70"]
+}, Open  ]]
+},
+WindowSize->{1022, 796},
+WindowMargins->{{Automatic, 123}, {Automatic, 0}},
+FrontEndVersion->"11.2 for Mac OS X x86 (32-bit, 64-bit Kernel) (September \
+10, 2017)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1355, 30, 94, "Input",ExpressionUUID->"d5cc5068-38b5-4d82-9f85-782122a59b16"],
+Cell[CellGroupData[{
+Cell[1938, 54, 159, 3, 45, "Subsubsection",ExpressionUUID->"402ebb8a-e2c8-4f25-8104-947b355f98d6"],
+Cell[CellGroupData[{
+Cell[2122, 61, 216, 4, 35, "Text",ExpressionUUID->"2e51e259-6c89-4228-8001-4f51424cf2a1",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.}],
+Cell[2341, 67, 9698, 213, 577, "Input",ExpressionUUID->"06fc249a-52cf-48c2-bbd3-026688d0e8a4",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.}]
+}, Open  ]],
+Cell[12054, 283, 866, 20, 160, "Print",ExpressionUUID->"aac10792-813f-469a-831f-bd62b3c389b8"],
+Cell[12923, 305, 361, 8, 24, "Message",ExpressionUUID->"b5ee80c0-de37-4e7f-8915-21b7d4cd0a97"],
+Cell[CellGroupData[{
+Cell[13309, 317, 268, 5, 35, "Text",ExpressionUUID->"93b5fc5e-d91a-4f00-9fd1-954851bfb40c",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.}],
+Cell[13580, 324, 8430, 202, 598, "Input",ExpressionUUID->"2b27b474-9248-4c54-9d01-c770523cd699",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.}]
+}, Open  ]],
+Cell[22025, 529, 1138, 22, 160, "Print",ExpressionUUID->"f1359780-88e0-44f3-a778-2dd58ff9163a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[23200, 556, 208, 4, 45, "Subsubsection",ExpressionUUID->"525d85ff-2c59-4c74-a542-a62665602c08"],
+Cell[CellGroupData[{
+Cell[23433, 564, 216, 4, 35, "Text",ExpressionUUID->"7e2b0b57-2ddd-40a7-9096-47237d3eb542",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.}],
+Cell[23652, 570, 9702, 214, 577, "Input",ExpressionUUID->"cd5903ff-6517-4d24-b41e-7f80e4379396",
+ CellGroupingRules->{"GroupTogetherGrouping", 10000.}]
+}, Open  ]],
+Cell[33369, 787, 882, 21, 160, "Print",ExpressionUUID->"7f9ecddd-f6b1-461e-bb1b-5892601e7e61"],
+Cell[CellGroupData[{
+Cell[34276, 812, 270, 5, 35, "Text",ExpressionUUID->"b2cff5d5-d652-40fc-9c8a-4be6843c8f59",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.}],
+Cell[34549, 819, 8595, 203, 598, "Input",ExpressionUUID->"453a5121-6384-420d-8ab0-29db1461d22d",
+ CellGroupingRules->{"GroupTogetherGrouping", 10001.}]
+}, Open  ]],
+Cell[43159, 1025, 1149, 22, 160, "Print",ExpressionUUID->"b346a674-fec3-4153-8439-650649eb0c70"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+
