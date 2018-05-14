@@ -25,9 +25,6 @@ except IndexError :
     print "Setting binSize to default of 100" 
     binSize = 100 
 
-
-
-
 datafiles = glob.glob('B_State/*/rgyr/without_ter.xvg') 
 index=0
 for datafile in datafiles : 
@@ -38,12 +35,26 @@ for datafile in datafiles :
 
     print datafile
     try : 
-        data = np.genfromtxt(datafile,skip_header=25) 
+        skip_lines = 0 
+        with open(datafile) as f : 
+            for line in f.readlines() : 
+                if line.startswith('#') or line.startswith('@') : 
+                    skip_lines += 1
+                else : 
+                    break 
+        data = np.genfromtxt(datafile,skip_header=skip_lines) 
     except IOError : 
         print "No gryate file found for %s"%(molec) 
         continue
     try : 
-        data2= np.genfromtxt(datafile2,skip_header=16) 
+        skip_lines = 0 
+        with open(datafile2) as f : 
+            for line in f.readlines() : 
+                if line.startswith('#') or line.startswith('@') : 
+                    skip_lines += 1
+                else : 
+                    break 
+        data2= np.genfromtxt(datafile2,skip_header=skip_lines) 
     except IOError : 
         print "No RMSD file found for %s"%(molec) 
         continue
