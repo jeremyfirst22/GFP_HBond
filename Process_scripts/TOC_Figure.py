@@ -120,6 +120,8 @@ for index, molec in enumerate(molecList) :
             binSize = anglesW[i+1] - anglesW[i]
         else : 
             binSize = anglesW[i] - anglesW[i-1]
+        dataWhis[i,1] *= binSize
+        dataWpoly[i,1] *= binSize 
         volumesW[i] = 2*np.pi * r**3 / 3 * (-np.cos((anglesW[i]+binSize/2) * np.pi / 180)  + np.cos((anglesW[i]-binSize/2)* np.pi / 180.) )
     print volumesW
     probsW = probsW / volumesW
@@ -130,6 +132,8 @@ for index, molec in enumerate(molecList) :
             binSize = anglesP[i+1] - anglesP[i]
         else : 
             binSize = anglesP[i] - anglesP[i-1]
+        dataPhis[i,1] *= binSize 
+        dataPpoly[i,1] *= binSize 
         volumesP[i] = 2*np.pi * r**3 / 3 * (-np.cos((anglesP[i]+binSize/2) * np.pi / 180)  + np.cos((anglesP[i]-binSize/2)* np.pi / 180.) )
     print volumesP
     probsP = probsP / volumesP
