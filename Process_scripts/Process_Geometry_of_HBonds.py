@@ -84,7 +84,7 @@ for index,molec in enumerate(molecList) :
        linewidths=1,colors='black',
            linestyles='solid',levels=np.arange(-1,1500,125))
 
-    ax.set_title(molec) 
+    ax.set_title(molec,color=nameToColorKeys[molec]) 
     ax.set_ylim([ymin,179])
     ax.set_xlim([xmin,xmax]) 
 
@@ -195,7 +195,7 @@ for index,molec in enumerate(molecList) :
        linewidths=1,colors='black',
            linestyles='solid',levels=np.arange(-1,1500,125))
 
-    ax.set_title(molec) 
+    ax.set_title(molec,color=nameToColorKeys[molec]) 
     ax.set_ylim([ymin,179])
     ax.set_xlim([xmin,xmax]) 
 
@@ -378,178 +378,187 @@ plt.close()
 #datafiles = glob.glob('B_State/*/fit_hbond_with_ca/dist.poly') 
 #
 ###Dist analysis
-#fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
-#fig.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
-#fig.text(0.5,0.02, r"$d_{CN}$", ha='center', va='center') 
-#fig.text(0.04,0.5, r"Occurances", ha='center', va='center',rotation='vertical') 
-#
-#figDens, axarrDens = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
-#figDens.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
-#figDens.text(0.5,0.04, r"$d_{CN}$", ha='center', va='center') 
-#figDens.text(0.04,0.5, r"$\rho_{\rm{dens}}$ Occurances/$\rm{\AA}^3$", ha='center', va='center',rotation='vertical') 
-#
-#f2, ax2 = plt.subplots(1,1) 
-#f2.subplots_adjust(left=0.20,right=0.95,top=0.95) 
-#f2.text(0.5,0.04, r"$d_{CN}$", ha='center', va='center') 
-#f2.text(0.04,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
-#
-#absMax = {} 
-#with open('Exp_data/sasa_abs_data.dat') as f : 
-#    for line in f : 
-#        if not line.startswith('#') : 
-#            key = line.split()[0] 
-#            value = float(line.split()[2]) 
-#            absMax[key] = value 
-#
-#
-#accumAvgTheta = [] 
-#accumAbsMax = [] 
-#for index, molec in enumerate(molecList) : 
-#    fileWhis = 'B_State/GFP_%s/fit_hbond_with_ca/dist.his'%(molec) 
-#    fileWpoly = 'B_State/GFP_%s/fit_hbond_with_ca/dist.poly'%(molec) 
-#    fileWgeom = 'B_State/GFP_%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
-#    filePhis = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.his'%(molec) 
-#    filePpoly = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.poly'%(molec) 
-#    filePgeom = 'B_State/GFP_%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
-#    
-#    headlines = 0 
-#    with open(fileWgeom) as f :
-#        lines = f.readlines() 
-#        for line in lines : 
-#            if line.startswith('#') or line.startswith('@') : 
-#                 headlines += 1 
-#            else : 
-#                 break 
-#
-#    dataWhis = np.genfromtxt(fileWhis) 
-#    dataWpoly = np.genfromtxt(fileWpoly) 
-#    dataWgeom = np.genfromtxt(fileWgeom,skip_header=headlines) 
-#
-#    headlines = 0 
-#    with open(fileWgeom) as f :
-#        lines = f.readlines() 
-#        for line in lines : 
-#            if line.startswith('#') or line.startswith('@') : 
-#                 headlines += 1 
-#            else : 
-#                 break 
-#
-#    dataPhis = np.genfromtxt(filePhis) 
-#    dataPpoly = np.genfromtxt(filePpoly) 
-#    dataPgeom = np.genfromtxt(filePgeom,skip_header=headlines) 
-#
-#    dataWhis[:,1] *= len(dataWgeom[:,0]) 
-#    dataWpoly[:,1] *= len(dataWgeom[:,0]) 
-#
-#    dataPhis[:,1] *= len(dataPgeom[:,0]) 
-#    dataPpoly[:,1] *= len(dataPgeom[:,0]) 
-#
-#    distsW = dataWpoly[:,0] 
-#    probsW = dataWpoly[:,1]
-#
-#    distsP = dataPpoly[:,0] 
-#    probsP = dataPpoly[:,1]
-#
-#    volumesW = np.zeros_like(distsW) 
-#    for i in range(len(volumesW)) : 
-#        if not i == len(volumesW) - 1 : 
-#            binSize = distsW[i+1] - distsW[i]
-#        else : 
-#            binSize = distsW[i] - distsW[i-1]
-#        volumesW[i] = 4/3 * np.pi * ((distsW[i]+binSize/2)**3 - (distsW[i]-binSize/2)**3)
-#    print volumesW
-#    probsW = probsW / volumesW
-#
-#    volumesP = np.zeros_like(distsP) 
-#    for i in range(len(volumesP)) : 
-#        if not i == len(volumesP) - 1 : 
-#            binSize = distsP[i+1] - distsP[i]
-#        else : 
-#            binSize = distsP[i] - distsP[i-1]
-#        volumesP[i] = 4/3 * np.pi * ((distsP[i]+binSize/2)**3 - (distsP[i]-binSize/2)**3)
-#    print volumesP
-#    probsP = probsP / volumesP
-#
-#    avgDistW = 0
-#    avgDistP = 0
-#    for i in range(len(distsW)) : 
-#        avgDistW = avgDistW + probsW[i] * distsW[i]
-#    for i in range(len(distsP)) : 
-#        avgDistP = avgDistP + probsP[i] * distsP[i]
-#
-#    avgDistTot = (avgDistW + avgDistP) / (sum(probsP)+sum(probsW))
-#    avgDistP = avgDistP / sum(probsP) 
-#    avgDistW = avgDistW / sum(probsW) 
-#
-#    print molec, avgDistTot
-#
-#    ax = axarr[index/figCols,index%figCols]
-#    axD = axarrDens[index/figCols,index%figCols]
-#
-#    if True :
-#        try : 
-#            ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100)  
-#            accumAbsMax.append(absMax["GFP_"+molec]) 
-#            accumAvgTheta.append(avgDistTot) 
-#
-#        except KeyError : 
-#            print "No key found for %s"%file.split('/')[1]
-#    else : 
-#        ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100,alpha=0.25)  
-#
-#    ax2.axhline(2227.5,color='k',linestyle='--') 
-#    ax2.axhline(2235.9,color='b',linestyle='--') 
-#    
-#    ax.scatter(dataWhis[:,0],dataWhis[:,1],color='b',linestyle='--',s=0.1)
-#    ax.scatter(dataPhis[:,0],dataPhis[:,1],color='g',linestyle='--',s=0.1)
-#    ax.plot(dataWpoly[:,0],dataWpoly[:,1],color='b',linestyle='--') 
-#    ax.plot(dataPpoly[:,0],dataPpoly[:,1],color='g',linestyle='--') 
-#    axD.plot(distsW,probsW,color='b',linestyle='-') 
-#    axD.plot(distsP,probsP,color='g',linestyle='-') 
-#    ax.axvline(avgDistW, color='b', linestyle='--') 
-#    ax.axvline(avgDistP, color='g', linestyle='--') 
-#    ax.axvline(avgDistTot, color='k', linestyle='--') 
-#    axD.axvline(avgDistW, color='b', linestyle='--') 
-#    axD.axvline(avgDistP, color='g', linestyle='--') 
-#    axD.axvline(avgDistTot, color='k', linestyle='--') 
-#
-#    ax.set_title(molec) 
-#    ax.set_ylim(0,30000)
-#    ax.set_xlim(1.45,2.45) 
-#
-#    axD.set_title(molec) 
-#    axD.set_ylim(0,80000) 
-#    axD.set_xlim(1.45,2.45) 
-#
-#slope,intercept,r_value,p_value,std_error = linregress(accumAvgTheta, accumAbsMax)
-#print "r = %f, p = %f"%(r_value,p_value) 
-#
-#xs = np.linspace(min(accumAvgTheta), max(accumAvgTheta) ) 
-#ys = slope * xs + intercept
-#ax2.plot(xs, ys, label="r = %0.3f"%r_value)
-#
-#ax2.legend(loc=4) 
-#fig.savefig('figures/Geometries_dist.png',format='png') 
-#figDens.savefig('figures/Geometries_dist_density.png',format='png') 
-#f2.savefig('figures/abs_max_vs_max_dist.pdf',format='pdf') 
-#plt.close() 
+fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
+fig.subplots_adjust(wspace=0.10,hspace=0.35,left=0.20,right=0.98,top=0.93,bottom=0.1) 
+fig.text(0.5,0.02, r"$d_{\rm{NH}}$ ($\rm{\AA}$)",ha='center', va='center') 
+fig.text(0.04,0.5, r"Occurences", ha='center', va='center',rotation='vertical') 
+
+figDens, axarrDens = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
+figDens.subplots_adjust(wspace=0.10,hspace=0.35,left=0.18,right=0.98,top=0.93,bottom=0.1) 
+figDens.text(0.5,0.04, r"$d_{\rm{NH}}$ ($\rm{\AA}$)", ha='center', va='center') 
+figDens.text(0.04,0.5, r"Probability density (Occurences/$\rm{\AA}^3$)", ha='center', va='center',rotation='vertical') 
+
+f2, ax2 = plt.subplots(1,1,figsize=(4.3,3) )
+f2.subplots_adjust(left=0.20,bottom=0.13,right=0.95,top=0.95) 
+f2.text(0.5,0.04, r"$d_{\rm{NH}}$ ($\rm{\AA}$)", ha='center', va='center') 
+f2.text(0.06,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
+
+absMax = {} 
+with open('Exp_data/sasa_abs_data.dat') as f : 
+    for line in f : 
+        if not line.startswith('#') : 
+            key = line.split()[0] 
+            value = float(line.split()[2]) 
+            absMax[key] = value 
+
+
+accumAvgTheta = [] 
+accumAbsMax = [] 
+for index, molec in enumerate(molecList) : 
+    fileWhis = 'B_State/GFP_%s/fit_hbond_with_ca/dist.his'%(molec) 
+    fileWpoly = 'B_State/GFP_%s/fit_hbond_with_ca/dist.poly'%(molec) 
+    fileWgeom = 'B_State/GFP_%s/fit_hbond_with_ca/geometry.xvg'%(molec) 
+    filePhis = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.his'%(molec) 
+    filePpoly = 'B_State/GFP_%s/fit_hbond_with_ca/nw_dist.poly'%(molec) 
+    filePgeom = 'B_State/GFP_%s/fit_hbond_with_ca/nw_geometry.xvg'%(molec) 
+    
+    headlines = 0 
+    with open(fileWgeom) as f :
+        lines = f.readlines() 
+        for line in lines : 
+            if line.startswith('#') or line.startswith('@') : 
+                 headlines += 1 
+            else : 
+                 break 
+
+    dataWhis = np.genfromtxt(fileWhis) 
+    dataWpoly = np.genfromtxt(fileWpoly) 
+    dataWgeom = np.genfromtxt(fileWgeom,skip_header=headlines) 
+
+    headlines = 0 
+    with open(fileWgeom) as f :
+        lines = f.readlines() 
+        for line in lines : 
+            if line.startswith('#') or line.startswith('@') : 
+                 headlines += 1 
+            else : 
+                 break 
+
+    dataPhis = np.genfromtxt(filePhis) 
+    dataPpoly = np.genfromtxt(filePpoly) 
+    dataPgeom = np.genfromtxt(filePgeom,skip_header=headlines) 
+
+    dataWhis[:,1] *= len(dataWgeom[:,0])  ## The histograms are unfortunately normalized. To un-normalize, 
+    dataWpoly[:,1] *= len(dataWgeom[:,0])  # we mutiply each bin times the magnitude of the histogram (here), 
+                                           # and the binSize (below in for loop) 
+    dataPhis[:,1] *= len(dataPgeom[:,0]) 
+    dataPpoly[:,1] *= len(dataPgeom[:,0]) 
+
+    distsW = dataWpoly[:,0] 
+    probsW = dataWpoly[:,1]
+
+    distsP = dataPpoly[:,0] 
+    probsP = dataPpoly[:,1]
+
+    volumesW = np.zeros_like(distsW) 
+    for i in range(len(volumesW)) : 
+        if not i == len(volumesW) - 1 : 
+            binSize = distsW[i+1] - distsW[i]
+        else : 
+            binSize = distsW[i] - distsW[i-1]
+        dataWhis[i,1] *= binSize
+        dataWpoly[i,1] *= binSize
+        volumesW[i] = 4/3 * np.pi * ((distsW[i]+binSize/2)**3 - (distsW[i]-binSize/2)**3)
+    #print volumesW
+    probsW = probsW / volumesW
+
+    volumesP = np.zeros_like(distsP) 
+    for i in range(len(volumesP)) : 
+        if not i == len(volumesP) - 1 : 
+            binSize = distsP[i+1] - distsP[i]
+        else : 
+            binSize = distsP[i] - distsP[i-1]
+        dataPhis[i,1] *= binSize
+        dataPpoly[i,1] *= binSize
+        volumesP[i] = 4/3 * np.pi * ((distsP[i]+binSize/2)**3 - (distsP[i]-binSize/2)**3)
+    print np.sum(dataPhis[:,1])
+    #print volumesP
+    probsP = probsP / volumesP
+
+    avgDistW = 0
+    avgDistP = 0
+    for i in range(len(distsW)) : 
+        avgDistW = avgDistW + probsW[i] * distsW[i]
+    for i in range(len(distsP)) : 
+        avgDistP = avgDistP + probsP[i] * distsP[i]
+
+    avgDistTot = (avgDistW + avgDistP) / (sum(probsP)+sum(probsW))
+    avgDistP = avgDistP / sum(probsP) 
+    avgDistW = avgDistW / sum(probsW) 
+
+    print molec, avgDistTot
+
+    ax = axarr[index/figCols,index%figCols]
+    axD = axarrDens[index/figCols,index%figCols]
+
+    if True :
+        try : 
+            ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='none',s=100)  
+            accumAbsMax.append(absMax["GFP_"+molec]) 
+            accumAvgTheta.append(avgDistTot) 
+
+        except KeyError : 
+            print "No key found for %s"%file.split('/')[1]
+    else : 
+        ax2.scatter(avgDistTot, absMax["GFP_"+molec],marker='P',label=molec,color=nameToColorKeys[molec],edgecolor='k',s=100,alpha=0.25)  
+
+    ax2.axhline(2227.5,color='k',linestyle='--') 
+    ax2.axhline(2235.9,color='#66CDFF',linestyle='--',zorder=1) 
+    
+    ax.scatter(dataWhis[:,0],dataWhis[:,1],color='b',linestyle='--',s=0.1)
+    ax.scatter(dataPhis[:,0],dataPhis[:,1],color='g',linestyle='--',s=0.1)
+    ax.plot(dataWpoly[:,0],dataWpoly[:,1],color='b',linestyle='--') 
+    ax.plot(dataPpoly[:,0],dataPpoly[:,1],color='g',linestyle='--') 
+    axD.plot(distsW,probsW,color='b',linestyle='-') 
+    axD.plot(distsP,probsP,color='g',linestyle='-') 
+    ax.axvline(avgDistW, color='b', linestyle='--') 
+    ax.axvline(avgDistP, color='g', linestyle='--') 
+    ax.axvline(avgDistTot, color='k', linestyle='--') 
+    axD.axvline(avgDistW, color='b', linestyle='--') 
+    axD.axvline(avgDistP, color='g', linestyle='--') 
+    axD.axvline(avgDistTot, color='k', linestyle='--') 
+
+    ax.set_title(molec,color=nameToColorKeys[molec]) 
+    #ax.set_ylim(0,30000)
+    ax.set_xlim(1.45,2.45) 
+
+    axD.set_title(molec,color=nameToColorKeys[molec]) 
+    #axD.set_ylim(0,100000) 
+    axD.set_xlim(1.45,2.45) 
+
+ax2.legend(loc=2,edgecolor='k',framealpha=1.0) 
+ax2.set_xlim([1.97,2.26]) 
+
+slope,intercept,r_value,p_value,std_error = linregress(accumAvgTheta, accumAbsMax)
+print "r = %f, p = %f"%(r_value,p_value) 
+
+xs = np.linspace(min(accumAvgTheta), max(accumAvgTheta) ) 
+ys = slope * xs + intercept
+ax2.plot(xs, ys, label="r = %0.3f"%r_value,color='k')
+
+f2.text(0.80,0.89,r"r = %0.3f"%r_value) 
+
+fig.savefig('figures/Geometries_dist.png',format='png') 
+figDens.savefig('figures/Geometries_dist_density.png',format='png') 
+f2.savefig('figures/abs_max_vs_max_dist.pdf',format='pdf') 
+plt.close() 
 #
 #
 ###Theta 1 analyis
 fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 fig.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
 fig.text(0.5,0.02, r"$\theta_1$ (deg)", ha='center', va='center') 
-fig.text(0.04,0.5, r"Occurances", ha='center', va='center',rotation='vertical') 
+fig.text(0.04,0.5, r"Occurences", ha='center', va='center',rotation='vertical') 
 
 figDens, axarrDens = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 figDens.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
 figDens.text(0.5,0.02, r"$\theta_1$ (deg)", ha='center', va='center') 
-figDens.text(0.03,0.5, r"Probability density (Occurances/$\rm{\AA}^3)$", ha='center', va='center',rotation='vertical') 
+figDens.text(0.03,0.5, r"Probability density (Occurences/$\rm{\AA}^3$)", ha='center', va='center',rotation='vertical') 
 
 f2, ax2 = plt.subplots(1,1,figsize=(4.3,3) )
 f2.subplots_adjust(left=0.20,bottom=0.13,right=0.95,top=0.95) 
 f2.text(0.5,0.02, r"$\theta_1$ (deg)", ha='center', va='center') 
-f2.text(0.03,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
+f2.text(0.06,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
 
 absMax = {} 
 with open('Exp_data/sasa_abs_data.dat') as f : 
@@ -596,9 +605,9 @@ for index, molec in enumerate(molecList) :
     dataPpoly = np.genfromtxt(filePpoly) 
     dataPgeom = np.genfromtxt(filePgeom,skip_header=headlines) 
 
-    dataWhis[:,1] *= len(dataWgeom[:,0]) 
-    dataWpoly[:,1] *= len(dataWgeom[:,0]) 
-
+    dataWhis[:,1] *= len(dataWgeom[:,0])  ## The histograms are unfortunately normalized. To un-normalize, 
+    dataWpoly[:,1] *= len(dataWgeom[:,0])  # we mutiply each bin times the magnitude of the histogram (here),  
+                                           # and the binSize (below in for loop) 
     dataPhis[:,1] *= len(dataPgeom[:,0]) 
     dataPpoly[:,1] *= len(dataPgeom[:,0]) 
 
@@ -620,8 +629,11 @@ for index, molec in enumerate(molecList) :
             binSize = anglesW[i+1] - anglesW[i]
         else : 
             binSize = anglesW[i] - anglesW[i-1]
+        dataWhis[i,1] *= binSize
+        dataWpoly[i,1] *= binSize
         volumesW[i] = 2*np.pi * r**3 / 3 * (-np.cos((anglesW[i]+binSize/2) * np.pi / 180)  + np.cos((anglesW[i]-binSize/2)* np.pi / 180.) )
-    print volumesW
+    #print volumesW
+    print np.sum(dataWhis[:,1]) 
     probsW = probsW / volumesW
 
     volumesP = np.zeros_like(anglesP) 
@@ -630,8 +642,10 @@ for index, molec in enumerate(molecList) :
             binSize = anglesP[i+1] - anglesP[i]
         else : 
             binSize = anglesP[i] - anglesP[i-1]
+        dataPhis[i,1] *= binSize
+        dataPpoly[i,1] *= binSize
         volumesP[i] = 2*np.pi * r**3 / 3 * (-np.cos((anglesP[i]+binSize/2) * np.pi / 180)  + np.cos((anglesP[i]-binSize/2)* np.pi / 180.) )
-    print volumesP
+    #print volumesP
     probsP = probsP / volumesP
 
     avgAngleW = 0
@@ -678,11 +692,11 @@ for index, molec in enumerate(molecList) :
     axD.axvline(avgAngleP, color='g', linestyle='--',zorder=1) 
     axD.axvline(avgAngleTot, color='k', linestyle='--',zorder=1) 
 
-    ax.set_title(molec) 
+    ax.set_title(molec,color=nameToColorKeys[molec]) 
     ax.set_ylim(0,450  ) 
     ax.set_xlim(100,180) 
 
-    axD.set_title(molec) 
+    axD.set_title(molec,color=nameToColorKeys[molec]) 
     axD.set_ylim(0,3500 ) 
     axD.set_xlim(100,180) 
 
@@ -732,17 +746,17 @@ plt.close()
 #fig, axarr = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 #fig.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
 #fig.text(0.5,0.02, r"$\theta_2$", ha='center', va='center') 
-#fig.text(0.04,0.5, r"Occurances", ha='center', va='center',rotation='vertical') 
+#fig.text(0.04,0.5, r"Occurences", ha='center', va='center',rotation='vertical') 
 #
 #figDens, axarrDens = plt.subplots(figRows,figCols,sharex='col',sharey='row') 
 #figDens.subplots_adjust(wspace=0.10,hspace=0.35,left=0.15,right=0.98,top=0.93,bottom=0.1) 
 #figDens.text(0.5,0.04, r"$\theta_2$", ha='center', va='center') 
-#figDens.text(0.04,0.5, r"$\rho_{\rm{dens}}$ Occurances/$\rm{\AA}^3$", ha='center', va='center',rotation='vertical') 
+#figDens.text(0.04,0.5, r"$\rho_{\rm{dens}}$ Occurences/$\rm{\AA}^3$", ha='center', va='center',rotation='vertical') 
 #
 #f2, ax2 = plt.subplots(1,1) 
 #f2.subplots_adjust(left=0.20,right=0.95,top=0.95) 
 #f2.text(0.5,0.04, r"$\theta_2$", ha='center', va='center') 
-#f2.text(0.04,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
+#f2.text(0.06,0.5, r"$\tilde{\nu}$ (cm$^{-1}$)", ha='center', va='center',rotation='vertical') 
 #
 #absMax = {} 
 #with open('Exp_data/sasa_abs_data.dat') as f : 
