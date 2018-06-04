@@ -1034,10 +1034,9 @@ fit_hbond(){
 
 sasa(){
     printf "\t\tAnalyzing SASA of CNF....................." 
-    if [ ! -f sasa/sidechain.xvg ] ; then 
+    if [ ! -f sasa/aromatic.xvg ] ; then 
         create_dir sasa
         cd sasa
-        clean 
 
         if [ ! -s cnf_area.xvg ] ; then 
             gmx sasa -f ../Production/$MOLEC.xtc \
@@ -1078,8 +1077,19 @@ sasa(){
                 -ndots 240 \
                 -o sidechain.xvg >> $logFile 2>> $errFile
             fi 
-        check nh_ct_area.xvg 
+        check sidechain.xvg 
 
+        if [ ! -s aromatic.xvg ] ; then 
+            gmx sasa -f ../Production/$MOLEC.xtc \
+                -s ../Production/$MOLEC.tpr \
+                -surface 'Protein' \
+                -output 'resname CNF and not name N H C O CA HA CB CB1 CB2' \
+                -ndots 240 \
+                -o aromatic.xvg >> $logFile 2>> $errFile
+            fi 
+        check aromatic.xvg 
+
+        clean
         printf "Success\n" 
         cd ../
     else
@@ -1547,7 +1557,7 @@ if ! $temp ; then
     #    hbond_4
     #    hbond_5
         fit_hbond_with_ca
-    #    sasa
+       sasa
     #    mindist 
     #    sorient
     #    rdf
